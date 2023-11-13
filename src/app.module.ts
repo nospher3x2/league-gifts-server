@@ -61,11 +61,11 @@ import { StoreModule } from './store/store.module';
   providers: [
     {
       provide: APP_PIPE,
-      useClass: ValidationPipe,
+      useClass: ResponseTransformInterceptor,
     },
     {
       provide: APP_PIPE,
-      useClass: ResponseTransformInterceptor,
+      useClass: ValidationPipe,
     },
     {
       provide: APP_PIPE,

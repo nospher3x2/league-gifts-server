@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { ResponseTransformInterceptor } from '@common/interceptors/response-transform.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -11,6 +12,7 @@ async function bootstrap() {
   app.useLogger(app.get(Logger));
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new LoggerErrorInterceptor());
+  app.useGlobalInterceptors(new ResponseTransformInterceptor());
   app.disable('x-powered-by');
 
   const configService = app.get(ConfigService);
