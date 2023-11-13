@@ -1,0 +1,38 @@
+services:
+  api:
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: development
+    env_file:
+        - .env
+    environment:
+      DATABASE_URL: mysql://${MYSQL_USERNAME}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}?createDatabaseIfNotExist=true
+    volumes:
+      - .:/usr/src/app
+    command: yarn start:dev
+    ports:
+      - 4000:4000
+    depends_on:
+      - redis
+      - mysql
+  redis: # Name of container
+    image: arm64v8/redis
+    restart: always
+    volumes: 
+      - redis:/data
+  mysql:
+    image: arm64v8/mysql:8.0
+    restart: always
+    environment:
+      MYSQL_USER: ${MYSQL_USERNAME}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_PORT: ${MYSQL_PORT}
+    volumes:
+      - mysql:/var/lib/mysql
+volumes:
+  mysql:
+  redis:
+    driver: local

@@ -1,0 +1,176 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-1.1.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  SUPPORT
+  USER
+}
+
+enum UserStatus {
+  ACTIVE
+  PENDING
+  BANNED
+  DELETED
+}
+
+model User {
+  id       String     @id @default(uuid())
+  email    String     @unique
+  name     String
+  password String
+  balance  Float      @default(0)
+  role     UserRole   @default(USER)
+  status   UserStatus @default(PENDING) // Pending = email not verified
+  cart     Cart?
+  orders   Order[]
+
+  //tokens    Token[]
+  // recharges Recharge[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+// enum TokenType {
+//   EMAIL_VERIFICATION
+//   PASSWORD_RESET
+// }
+
+// model Token {
+//   id        String    @id @default(uuid())
+//   type      TokenType
+//   token     String    @unique
+//   userId    String
+//   user      User      @relation(fields: [userId], references: [id])
+//   createdAt DateTime  @default(now())
+//   updatedAt DateTime  @updatedAt
+// }
+
+// enum RechargeMethod {
+//   PIX
+//   BITCOIN
+//   ETHEREUM
+//   LITECOIN
+//   MANUALLY
+// }
+
+// enum RechargeStatus {
+//   PENDING
+//   WAITING_CONFIRMATION
+//   CONFIRMED
+//   CHARGEBACK
+//   CANCELED
+//   FAILED
+// }
+
+// model Recharge {
+//   id        String         @id @default(uuid())
+//   method    RechargeMethod
+//   status    RechargeStatus @default(PENDING)
+//   amount    Float
+//   userId    String
+//   user      User           @relation(fields: [userId], references: [id])
+//   createdAt DateTime       @default(now())
+//   updatedAt DateTime       @updatedAt
+// }
+
+enum Currency {
+  IP
+  RP
+}
+
+enum StoreItemStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model StoreItem {
+  id               String          @id @default(uuid())
+  name             String
+  iconUrl          String          @map("icon_url")
+  status           StoreItemStatus @default(ACTIVE)
+  currency         Currency
+  price            Float
+  offerId          String          @map("offer_id")
+  inventoryType    String          @default("") @map("inventory_type")
+  subInventoryType String?         @default("") @map("sub_inventory_type")
+  orders           OrderProduct[]
+  carts            Cart[]
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+}
+
+model Cart {
+  id        String      @id @default(uuid())
+  items     StoreItem[]
+  user      User        @relation(fields: [userId], references: [id])
+  userId    String      @unique @map("user_id")
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+}
+
+model LeagueAccount {
+  id        String         @id @default(uuid())
+  region    String
+  username  String
+  password  String
+  rp        Int
+  ip        Int
+  orders    OrderProduct[]
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+}
+
+enum OrderStatus {
+  PENDING
+  FINISHED
+  CANCELED
+  FAILED
+}
+
+model Order {
+  id          String         @id @default(uuid())
+  totalAmount Float          @map("total_amount")
+  products    OrderProduct[]
+  status      OrderStatus    @default(PENDING)
+  user        User           @relation(fields: [userId], references: [id])
+  userId      String         @map("user_id")
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+
+  @@map("orders")
+}
+
+enum OrderProductStatus {
+  ACCEPTED
+  FULFILLMENT_SUCCESSFUL
+  FAILED
+  OTHER
+}
+
+model OrderProduct {
+  id              String             @id @default(uuid())
+  order           Order              @relation(fields: [orderId], references: [id])
+  item            StoreItem          @relation(fields: [itemId], references: [id])
+  account         LeagueAccount      @relation(fields: [senderAccountId], references: [id])
+  price           Float
+  status          OrderProductStatus
+  transactionId   String             @map("transaction_id")
+  orderId         String             @map("order_id")
+  itemId          String             @map("item_id")
+  senderAccountId String             @map("sender_account_id")
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
+
+  @@map("orders_products")
+}
