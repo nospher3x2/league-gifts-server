@@ -29,7 +29,7 @@ export class ResponseTransformInterceptor<T>
       map((data) => ({
         statusCode: context.switchToHttp().getResponse().statusCode,
         message: data.message,
-        data: data.data,
+        data: data.data ?? data,
       })),
     );
   }
