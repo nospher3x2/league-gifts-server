@@ -1,6 +1,7 @@
 import { Exclude } from 'class-transformer';
 import { UserStatus } from '../enums/user.status.enum';
 import { UserRole } from '../enums/user.role.enum';
+import Decimal from 'decimal.js';
 
 export class UserDomain {
   public id: string;
@@ -18,5 +19,9 @@ export class UserDomain {
 
   constructor(partial: Partial<UserDomain>) {
     Object.assign(this, partial);
+  }
+
+  public hasSufficientBalance(amount: number): boolean {
+    return Decimal.sub(this.balance, amount).gte(0);
   }
 }
