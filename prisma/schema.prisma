@@ -120,15 +120,17 @@ model Cart {
 }
 
 model LeagueAccount {
-  id        String         @id @default(uuid())
-  region    String
-  username  String
-  password  String
-  rp        Int
-  ip        Int
-  orders    OrderProduct[]
-  createdAt DateTime       @default(now()) @map("created_at")
-  updatedAt DateTime       @updatedAt @map("updated_at")
+  id                   String         @id @default(uuid())
+  region               String
+  username             String
+  password             String
+  rp                   Int
+  ip                   Int
+  partnerToken         String         @map("partner_token")
+  partnerTokenExpireAt DateTime       @map("partner_token_expire_at")
+  orders               OrderProduct[]
+  createdAt            DateTime       @default(now()) @map("created_at")
+  updatedAt            DateTime       @updatedAt @map("updated_at")
 }
 
 enum OrderStatus {
