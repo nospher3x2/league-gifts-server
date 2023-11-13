@@ -1,5 +1,3 @@
-import { randomUUID } from 'crypto';
-
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@common';
 import { CreateUserDto } from 'src/users/dtos/create.user.dto';
@@ -7,6 +5,7 @@ import { UserDomain } from 'src/users/domain/user.domain';
 import { UserRole, UserStatus } from '@prisma/client';
 import { UsersRepository } from '../users.repository';
 import { PrismaUsersMapper } from '../mappers/prisma.users.mapper';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class PrismaUsersRepository implements UsersRepository {
@@ -18,11 +17,6 @@ export class PrismaUsersRepository implements UsersRepository {
         id,
       },
     });
-
-    if (!user) {
-      return null;
-    }
-
     return PrismaUsersMapper.toDomain(user);
   }
 
@@ -32,15 +26,10 @@ export class PrismaUsersRepository implements UsersRepository {
         email,
       },
     });
-
-    if (!user) {
-      return null;
-    }
-
     return PrismaUsersMapper.toDomain(user);
   }
 
-  public async countOneByEmail(email: string): Promise<number> {
+  public countOneByEmail(email: string): Promise<number> {
     return this.prisma.user.count({
       where: {
         email,
@@ -61,7 +50,6 @@ export class PrismaUsersRepository implements UsersRepository {
         status: UserStatus.PENDING,
       },
     });
-
     return PrismaUsersMapper.toDomain(user);
   }
 }
