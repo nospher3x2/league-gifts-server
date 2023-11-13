@@ -13,4 +13,7 @@ export abstract class StoreItemRepository {
   public abstract createOne(
     createStoreItemDto: CreateStoreItemDto,
   ): Promise<StoreItemDomain>;
+  public abstract createMany(
+    createStoreItemDtos: CreateStoreItemDto[],
+  ): Promise<number>;
 }

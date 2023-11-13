@@ -5,32 +5,53 @@ import { StoreItemDomain } from 'src/store/entities/store.item.domain';
 import { StoreItemStatus } from 'src/store/enums/store.item.status.enum';
 import { CreateStoreItemDto } from 'src/store/dtos/create.store.item.dto';
 import { randomUUID } from 'crypto';
+import { PrismaStoreItemMapper } from '../mappers/prisma.store.item.mapper';
 
 @Injectable()
 export class PrismaStoreItemRepository implements StoreItemRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  public findAllByStatus(
+  public async findAllByStatus(
     status: keyof typeof StoreItemStatus,
   ): Promise<StoreItemDomain[]> {
-    return this.prisma.storeItem.findMany({ where: { status } });
+    const items = await this.prisma.storeItem.findMany({ where: { status } });
+    return items.map(PrismaStoreItemMapper.toDomain);
   }
 
-  public findOneByIdAndStatus(
+  public async findOneByIdAndStatus(
     id: string,
     status: keyof typeof StoreItemStatus,
   ): Promise<StoreItemDomain> {
-    return this.prisma.storeItem.findUnique({ where: { id, status } });
+    const item = await this.prisma.storeItem.findUnique({
+      where: { id, status },
+    });
+
+    return PrismaStoreItemMapper.toDomain(item);
   }
 
-  public createOne(
+  public async createOne(
     createStoreItemDto: CreateStoreItemDto,
   ): Promise<StoreItemDomain> {
-    return this.prisma.storeItem.create({
+    const item = await this.prisma.storeItem.create({
       data: {
         id: randomUUID(),
         ...createStoreItemDto,
       },
     });
+
+    return PrismaStoreItemMapper.toDomain(item);
+  }
+
+  public async createMany(
+    createStoreItemDtos: CreateStoreItemDto[],
+  ): Promise<number> {
+    const items = await this.prisma.storeItem.createMany({
+      data: createStoreItemDtos.map((item) => ({
+        id: randomUUID(),
+        ...item,
+      })),
+    });
+
+    return items.count;
   }
 }

@@ -27,6 +27,12 @@ export class StoreService {
     return this.storeItemRepository.createOne(createStoreItemDto);
   }
 
+  public async createManyItems(
+    createStoreItemDtos: CreateStoreItemDto[],
+  ): Promise<number> {
+    return this.storeItemRepository.createMany(createStoreItemDtos);
+  }
+
   public getFlatItemPriceByRegion(
     price: number,
     currency: keyof typeof StoreItemCurrency,
