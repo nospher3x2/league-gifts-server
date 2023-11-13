@@ -19,4 +19,8 @@ export class StoreItemDomain {
   public createdAt: Date;
   @Exclude()
   public updatedAt: Date;
+
+  constructor(partial: Partial<StoreItemDomain>) {
+    Object.assign(this, partial);
+  }
 }
