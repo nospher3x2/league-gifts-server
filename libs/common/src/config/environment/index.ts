@@ -24,4 +24,10 @@ export default () => ({
   },
   jwt_secret_key: process.env.JWT_SECRET_KEY,
   jwt_expires_in: process.env.JWT_EXPIRATION_TIME,
+  prices: {
+    BR1: {
+      IP: 0.0006,
+      RP: 0.01481481,
+    },
+  },
 });
