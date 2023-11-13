@@ -2,6 +2,7 @@ import { Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { StoreItemDomain } from '../entities/store.item.domain';
 import { StoreService } from '../services/store.service';
+import { plainToInstance } from 'class-transformer';
 
 interface StoreItemWithFlatPrice extends StoreItemDomain {
   flatPrice: number;
@@ -17,14 +18,17 @@ export class StoreController {
     @Query('region') region: string = 'BR1',
   ): Promise<StoreItemWithFlatPrice[]> {
     const items = await this.storeService.findAllActiveItems();
-    return items.map((item) => ({
-      ...item,
-      flatPrice: this.storeService.getFlatItemPriceByRegion(
-        item.price,
-        item.currency,
-        region,
-      ),
-    }));
+    return items.map((item) => {
+      const itemInstance = plainToInstance(StoreItemDomain, item);
+      return {
+        ...itemInstance,
+        flatPrice: this.storeService.getFlatItemPriceByRegion(
+          item.price,
+          item.currency,
+          region,
+        ),
+      };
+    });
   }
 
   @Get('items/:id')
@@ -32,7 +36,11 @@ export class StoreController {
     @Param('id') id: string,
     @Query('region') region: string = 'BR1',
   ): Promise<StoreItemWithFlatPrice> {
-    const item = await this.storeService.findOneActiveItemById(id);
+    const item = plainToInstance(
+      StoreItemDomain,
+      await this.storeService.findOneActiveItemById(id),
+    );
+
     return {
       ...item,
       flatPrice: this.storeService.getFlatItemPriceByRegion(

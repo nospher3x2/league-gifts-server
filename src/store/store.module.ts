@@ -18,5 +18,6 @@ import { StoreItemPriceConfig } from './config/StoreItemPriceConfig';
     },
   ],
   controllers: [StoreController],
+  exports: [StoreService],
 })
 export class StoreModule {}
