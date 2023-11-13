@@ -1,7 +1,9 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 import { UserDomain } from '../domain/user.domain';
+import { PasswordDto } from '@common/password/password.dto';
 
 export class CreateUserDto
+  extends PasswordDto
   implements Pick<UserDomain, 'name' | 'email' | 'password'>
 {
   @IsString()
@@ -12,13 +14,4 @@ export class CreateUserDto
   @IsString()
   @IsNotEmpty()
   public readonly name: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(6)
-  public readonly password: string;
-
-  @IsString()
-  @IsNotEmpty()
-  public readonly confirmPassword: string;
 }
