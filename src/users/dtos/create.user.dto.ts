@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
 import { UserDomain } from '../domain/user.domain';
 
 export class CreateUserDto
@@ -15,6 +15,7 @@ export class CreateUserDto
 
   @IsString()
   @IsNotEmpty()
+  @MinLength(6)
   public readonly password: string;
 
   @IsString()
