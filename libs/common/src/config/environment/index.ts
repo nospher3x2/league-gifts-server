@@ -1,6 +1,8 @@
 export default () => ({
   env: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT, 10) || 3000,
+  jwt_secret_key: process.env.JWT_SECRET_KEY,
+  jwt_expires_in: process.env.JWT_EXPIRATION_TIME,
   database: {
     mysql: {
       host: process.env.MYSQL_HOST,
@@ -22,12 +24,50 @@ export default () => ({
     username: process.env.MAIL_USERNAME,
     password: process.env.MAIL_PASSWORD,
   },
-  jwt_secret_key: process.env.JWT_SECRET_KEY,
-  jwt_expires_in: process.env.JWT_EXPIRATION_TIME,
-  prices: {
-    BR1: {
-      IP: 0.0006,
-      RP: 0.01481481,
+  store: {
+    prices: {
+      BR1: {
+        IP: 0.0006,
+        RP: 0.01481481,
+      },
+    },
+  },
+  riot: {
+    auth: {
+      riot_url: 'https://auth.riotgames.com',
+      hydra_url: 'https://api.hydranetwork.org',
+      hydra_key: process.env.HYDRA_AUTH_KEY,
+    },
+    login_queue_url: {
+      BR1: 'https://usw2-green.pp.sgp.pvp.net',
+      EUN1: 'https://euc1-green.pp.sgp.pvp.net',
+      EUW1: 'https://euc1-green.pp.sgp.pvp.net',
+      LA1: 'https://usw2-green.pp.sgp.pvp.net',
+      LA2: 'https://usw2-green.pp.sgp.pvp.net',
+      NA1: 'https://usw2-green.pp.sgp.pvp.net',
+      OC1: 'https://apse1-green.pp.sgp.pvp.net',
+      RU: 'https://euc1-green.pp.sgp.pvp.net',
+      TR1: 'https://euc1-green.pp.sgp.pvp.net',
+      JP1: 'https://apne1-green.pp.sgp.pvp.net',
+      SG2: 'https://apse1-green.pp.sgp.pvp.net',
+      PH2: 'https://ph2-red.lol.sgp.pvp.net',
+      VN2: 'https://apse1-green.pp.sgp.pvp.net',
+    },
+    ledge_url: {
+      BR1: 'https://br-red.lol.sgp.pvp.net',
+      EUN1: 'https://eune-red.lol.sgp.pvp.net',
+      EUW1: 'https://euw-red.lol.sgp.pvp.net',
+      LA1: 'https://lan-red.lol.sgp.pvp.net',
+      LA2: 'https://las-red.lol.sgp.pvp.net',
+      NA1: 'https://na-red.lol.sgp.pvp.net',
+      OC1: 'https://oce-red.lol.sgp.pvp.net',
+      RU: 'https://ru-red.lol.sgp.pvp.net',
+      TR1: 'https://tr-red.lol.sgp.pvp.net',
+      JP1: 'https://jp-red.lol.sgp.pvp.net',
+      KR: 'https://kr-red.lol.sgp.pvp.net',
+      SG2: 'https://sg2-red.lol.sgp.pvp.net',
+      PH2: 'https://ph2-red.lol.sgp.pvp.net',
+      VN2: 'https://vn2-red.lol.sgp.pvp.net',
     },
   },
 });

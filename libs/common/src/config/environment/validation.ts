@@ -17,6 +17,7 @@ export default Joi.object({
   REDIS_PORT: Joi.number().default(6379),
   REDIS_PASSWORD: Joi.string().required(),
 
+  HYDRA_AUTH_KEY: Joi.string().required(),
   JWT_SECRET_KEY: Joi.string().required(),
   JWT_EXPIRATION_TIME: Joi.string().required(),
 
