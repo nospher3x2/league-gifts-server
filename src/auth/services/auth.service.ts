@@ -1,5 +1,5 @@
 import { PasswordService } from '@common';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserDomain } from 'src/users/domain/user.domain';
 import { CreateUserDto } from 'src/users/dtos/create.user.dto';
@@ -50,19 +50,19 @@ export class AuthService {
           return;
         }
 
-        throw new UnauthorizedException(
+        throw new ForbiddenException(
           'You need to activate your account before you can login',
         );
       case 'BANNED':
-        throw new UnauthorizedException(
+        throw new ForbiddenException(
           'Your account has been banned, please contact the administrator',
         );
       case 'DELETED':
-        throw new UnauthorizedException(
+        throw new ForbiddenException(
           'Your account has been deleted, please contact the administrator',
         );
       default:
-        throw new UnauthorizedException(
+        throw new ForbiddenException(
           'Your account is not active, please contact the administrator',
         );
     }
