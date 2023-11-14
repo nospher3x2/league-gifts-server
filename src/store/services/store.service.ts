@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { StoreItemRepository } from '../repositories/store.item.repository';
-import { StoreItemPriceConfig } from '../config/StoreItemPriceConfig';
 import { StoreItemCurrency } from '../enums/store.item.currency.enum';
 import { Decimal } from 'decimal.js';
 import { CreateStoreItemDto } from '../dtos/create.store.item.dto';
 import { StoreItemDomain } from '../entities/store.item.domain';
+import { StoreItemPriceConfig } from '../config/store.item.price.config';
 
 @Injectable()
 export class StoreService {
