@@ -41,6 +41,18 @@ export class PrismaRecipientsRepository implements RecipientsRepository {
     return PrismaRecipientsMapper.toDomain(recipient);
   }
 
+  public async countManyByUserId(
+    userId: string,
+    limit: number,
+  ): Promise<number> {
+    return this.prisma.recipient.count({
+      where: {
+        userId,
+      },
+      take: limit,
+    });
+  }
+
   public async countOneByPuuidAndUserId(
     puuid: string,
     userId: string,
@@ -88,5 +100,17 @@ export class PrismaRecipientsRepository implements RecipientsRepository {
     });
 
     return PrismaRecipientsMapper.toDomain(result);
+  }
+
+  public async deleteOneByIdAndUserId(
+    id: string,
+    userId: string,
+  ): Promise<void> {
+    await this.prisma.recipient.delete({
+      where: {
+        id,
+        userId,
+      },
+    });
   }
 }

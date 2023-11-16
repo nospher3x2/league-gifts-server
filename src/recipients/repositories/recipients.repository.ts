@@ -8,6 +8,11 @@ export abstract class RecipientsRepository {
     userId: string,
   ): Promise<RecipientDomain | null>;
 
+  public abstract countManyByUserId(
+    userId: string,
+    limit: number,
+  ): Promise<number>;
+
   public abstract countOneByPuuidAndUserId(
     puuid: string,
     userId: string,
@@ -18,4 +23,9 @@ export abstract class RecipientsRepository {
   ): Promise<RecipientDomain>;
 
   public abstract saveOne(recipient: RecipientDomain): Promise<RecipientDomain>;
+
+  public abstract deleteOneByIdAndUserId(
+    id: string,
+    userId: string,
+  ): Promise<void>;
 }

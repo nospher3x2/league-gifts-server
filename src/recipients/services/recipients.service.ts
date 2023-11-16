@@ -28,6 +28,13 @@ export class RecipientsService {
     return this.recipientsRepository.findOneByIdAndUserId(id, userId);
   }
 
+  public async countManyByUserId(
+    userId: string,
+    limit: number,
+  ): Promise<number> {
+    return this.recipientsRepository.countManyByUserId(userId, limit);
+  }
+
   public async checkIfRecipientExistsByPuuidAndUserId(
     puuid: string,
     userId: string,
@@ -44,6 +51,13 @@ export class RecipientsService {
     createRecipientDto: CreateRecipientDto,
     userId: string,
   ): Promise<RecipientDomain> {
+    const recipientsCount = await this.countManyByUserId(userId, 3);
+    if (recipientsCount >= 3) {
+      throw new BadRequestException(
+        `You can only have 3 recipients, please delete one and try again`,
+      );
+    }
+
     const manager = await this.accountsService.findOneManagerAccount(
       createRecipientDto.region,
     );
@@ -104,7 +118,7 @@ export class RecipientsService {
       recipient.name,
     );
 
-    const changed = recipient.profileIconId === recipient.requiredProfileIconId;
+    const changed = summoner.profileIconId === recipient.requiredProfileIconId;
     if (!changed) {
       throw new BadRequestException(
         `Recipient ${recipient.name} did not change profile icon to required icon (${recipient.requiredProfileIconId})`,
@@ -112,8 +126,16 @@ export class RecipientsService {
     }
 
     recipient.name = summoner.name;
-    recipient.profileIconId = summoner.profileIconId;
     recipient.status = 'VERIFIED';
     return this.recipientsRepository.saveOne(recipient);
+  }
+
+  public async deleteOne(recipientId: string, userId: string): Promise<void> {
+    const recipient = await this.findOneByIdAndUserId(recipientId, userId);
+    if (!recipient) {
+      throw new NotFoundException('Recipient not found');
+    }
+
+    await this.recipientsRepository.deleteOneByIdAndUserId(recipientId, userId);
   }
 }

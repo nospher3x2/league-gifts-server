@@ -3,6 +3,9 @@ import { RecipientDomain } from 'src/recipients/entities/recipient.domain';
 
 export class PrismaRecipientsMapper {
   public static toDomain(raw: RawRecipient): RecipientDomain {
+    if (!raw) {
+      return null;
+    }
     return new RecipientDomain({
       id: raw.id,
       name: raw.name,
