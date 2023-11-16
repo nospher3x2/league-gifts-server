@@ -28,8 +28,8 @@ export class ResponseTransformInterceptor<T>
     return next.handle().pipe(
       map((data) => ({
         statusCode: context.switchToHttp().getResponse().statusCode,
-        message: data.message,
-        data: data.data ?? data,
+        message: data?.message,
+        data: data?.data ?? (data.message ? null : data),
       })),
     );
   }
