@@ -13,8 +13,5 @@ ALTER TABLE `Recipient` DROP FOREIGN KEY `Recipient_userId_fkey`;
 ALTER TABLE `Recipient` DROP COLUMN `userId`,
     ADD COLUMN `user_id` VARCHAR(191) NOT NULL;
 
--- CreateIndex
-CREATE UNIQUE INDEX `Recipient_user_id_key` ON `Recipient`(`user_id`);
-
 -- AddForeignKey
 ALTER TABLE `Recipient` ADD CONSTRAINT `Recipient_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
