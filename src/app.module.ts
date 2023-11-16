@@ -18,6 +18,7 @@ import { UsersModule } from './users/users.module';
 import { ResponseTransformInterceptor } from '@common/interceptors/response-transform.interceptor';
 import { AccountsModule } from './accounts/accounts.module';
 import { StoreModule } from './store/store.module';
+import { RecipientsModule } from './recipients/recipients.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { StoreModule } from './store/store.module';
     AuthModule,
     AccountsModule,
     StoreModule,
+    RecipientsModule,
   ],
   controllers: [],
   providers: [

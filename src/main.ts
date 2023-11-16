@@ -10,7 +10,11 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.useLogger(app.get(Logger));
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  );
   app.useGlobalInterceptors(new LoggerErrorInterceptor());
   app.useGlobalInterceptors(new ResponseTransformInterceptor());
   app.disable('x-powered-by');
