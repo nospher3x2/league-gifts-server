@@ -265,6 +265,10 @@ export class AccountsService {
     path: string,
     body?: any,
   ): Promise<T> {
+    const token = path.includes('storefront/')
+      ? account.partnerToken
+      : account.sessionQueueToken;
+
     return firstValueFrom(
       this.httpService
         .request<T>({
@@ -274,7 +278,7 @@ export class AccountsService {
           method,
           data: body,
           headers: {
-            Authorization: `Bearer ${account.partnerToken}`,
+            Authorization: `Bearer ${token}`,
           },
         })
         .pipe(
