@@ -12,19 +12,19 @@ import { UsersRepository } from '../repositories/users.repository';
 export class UsersService {
   constructor(
     private readonly passwordService: PasswordService,
-    private readonly userRepository: UsersRepository,
+    private readonly usersRepository: UsersRepository,
   ) {}
 
   public async findOneById(id: string): Promise<UserDomain | null> {
-    return this.userRepository.findOneById(id);
+    return this.usersRepository.findOneById(id);
   }
 
   public async findOneByEmail(email: string): Promise<UserDomain | null> {
-    return this.userRepository.findOneByEmail(email);
+    return this.usersRepository.findOneByEmail(email);
   }
 
   public async checkIfUserExistsByEmail(email: string): Promise<boolean> {
-    const count = await this.userRepository.countOneByEmail(email);
+    const count = await this.usersRepository.countOneByEmail(email);
     return count === 1;
   }
 
@@ -45,7 +45,7 @@ export class UsersService {
       createUserDto.password,
     );
 
-    const user = await this.userRepository.createOne({
+    const user = await this.usersRepository.createOne({
       ...createUserDto,
       password: hashedPassword,
     });

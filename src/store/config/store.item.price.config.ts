@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { StoreItemCurrency } from '../enums/store.item.currency.enum';
 
 @Injectable()
 export class StoreItemPriceConfig {
   constructor(private readonly configService: ConfigService) {}
 
-  get itemPriceByRegion(): Record<string, Record<'IP' | 'RP', number>> {
-    return this.configService.get('store.prices');
+  public getCurrencyPriceByRegion(
+    currency: keyof typeof StoreItemCurrency,
+    region: string,
+  ) {
+    return this.configService.getOrThrow(`store.prices.${region}.${currency}`);
   }
 }

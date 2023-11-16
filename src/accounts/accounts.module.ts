@@ -24,6 +24,6 @@ import { HydraAuthProvider } from './providers/implementations/hydra.auth.provid
       useClass: HydraAuthProvider,
     },
   ],
-  exports: [AccountsService],
+  exports: [AccountsServiceConfig, AccountsService],
 })
 export class AccountsModule {}
