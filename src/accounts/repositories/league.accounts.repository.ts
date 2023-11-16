@@ -1,18 +1,23 @@
 import { LeagueAccountDomain } from '../entities/league.account.domain';
+import { LeagueAccountType } from '../enums/league.account.type.enum';
 
 export abstract class LeagueAccountsRepository {
   public abstract findOneById(id: string): Promise<LeagueAccountDomain | null>;
+
   public abstract findOneByUsername(
     username: string,
   ): Promise<LeagueAccountDomain | null>;
-  public abstract upsertOne(
-    id: string,
-    username: string,
-    password: string,
+
+  public abstract findOneByRegionAndType(
     region: string,
-    ip: number,
-    rp: number,
-    partnerToken: string,
-    partnerTokenExpireAt: Date,
+    type: keyof typeof LeagueAccountType,
+  ): Promise<LeagueAccountDomain | null>;
+
+  public abstract findOneManagerWithNonExpiredSessionQueueTokenByRegion(
+    region: string,
+  ): Promise<LeagueAccountDomain | null>;
+
+  public abstract upsertOne(
+    leagueAccountDomain: LeagueAccountDomain,
   ): Promise<LeagueAccountDomain>;
 }

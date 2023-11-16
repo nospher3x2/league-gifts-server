@@ -25,20 +25,42 @@ enum UserStatus {
 }
 
 model User {
-  id       String     @id @default(uuid())
-  email    String     @unique
-  name     String
-  password String
-  balance  Float      @default(0)
-  role     UserRole   @default(USER)
-  status   UserStatus @default(PENDING) // Pending = email not verified
-  cart     Cart?
-  orders   Order[]
+  id         String      @id @default(uuid())
+  email      String      @unique
+  name       String
+  password   String
+  balance    Float       @default(0)
+  role       UserRole    @default(USER)
+  status     UserStatus  @default(PENDING) // Pending = email not verified
+  recipients Recipient[]
+  cart       Cart?
+  orders     Order[]
 
   //tokens    Token[]
   // recharges Recharge[]
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+enum RecipientStatus {
+  PENDING
+  VERIFIED
+  REMOVED
+}
+
+model Recipient {
+  id                    String          @id @default(uuid())
+  name                  String
+  region                String
+  profileIconId         Int
+  requiredProfileIconId Int             @map("required_profile_icon_id")
+  puuid                 String
+  status                RecipientStatus @default(PENDING)
+  user                  User            @relation(fields: [userId], references: [id])
+  orders                Order[]
+  userId                String          @unique @map("user_id")
+  createdAt             DateTime        @default(now()) @map("created_at")
+  updatedAt             DateTime        @updatedAt @map("updated_at")
 }
 
 // enum TokenType {
@@ -119,18 +141,27 @@ model Cart {
   updatedAt DateTime    @updatedAt @map("updated_at")
 }
 
+enum LeagueAccountType {
+  GIFT
+  MANAGER
+}
+
 model LeagueAccount {
-  id                   String         @id @default(uuid())
-  region               String
-  username             String
-  password             String
-  rp                   Int
-  ip                   Int
-  partnerToken         String         @map("partner_token")
-  partnerTokenExpireAt DateTime       @map("partner_token_expire_at")
-  orders               OrderProduct[]
-  createdAt            DateTime       @default(now()) @map("created_at")
-  updatedAt            DateTime       @updatedAt @map("updated_at")
+  id                        String            @id @default(uuid())
+  region                    String
+  username                  String
+  password                  String
+  rp                        Int
+  ip                        Int
+  partnerToken              String            @map("partner_token")
+  partnerTokenExpireAt      DateTime          @map("partner_token_expire_at")
+  userInfoToken             String?           @map("user_info_token")
+  sessionQueueToken         String?           @map("session_queue_token")
+  sessionQueueTokenExpireAt DateTime?         @map("session_queue_token_expire_at")
+  type                      LeagueAccountType
+  orders                    OrderProduct[]
+  createdAt                 DateTime          @default(now()) @map("created_at")
+  updatedAt                 DateTime          @updatedAt @map("updated_at")
 }
 
 enum OrderStatus {
@@ -145,7 +176,9 @@ model Order {
   totalAmount Float          @map("total_amount")
   products    OrderProduct[]
   status      OrderStatus    @default(PENDING)
+  recipient   Recipient      @relation(fields: [recipientId], references: [id])
   user        User           @relation(fields: [userId], references: [id])
+  recipientId String         @map("recipient_id")
   userId      String         @map("user_id")
   createdAt   DateTime       @default(now()) @map("created_at")
   updatedAt   DateTime       @updatedAt @map("updated_at")

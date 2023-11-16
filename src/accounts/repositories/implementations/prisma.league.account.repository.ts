@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { LeagueAccountDomain } from 'src/accounts/entities/league.account.domain';
 import { LeagueAccountsRepository } from '../league.accounts.repository';
 import { PrismaLeagueAccountsMapper } from '../mappers/prisma.league.accounts.mapper';
+import { LeagueAccountType } from 'src/accounts/enums/league.account.type.enum';
 
 @Injectable()
 export class PrismaLeagueAccountsRepository
@@ -32,37 +33,69 @@ export class PrismaLeagueAccountsRepository
     return PrismaLeagueAccountsMapper.toDomain(account);
   }
 
-  public async upsertOne(
-    id: string,
-    username: string,
-    password: string,
+  public async findOneByRegionAndType(
     region: string,
-    ip: number,
-    rp: number,
-    partnerToken: string,
-    partnerTokenExpireAt: Date,
+    type: keyof typeof LeagueAccountType,
+  ): Promise<LeagueAccountDomain> {
+    const account = await this.prisma.leagueAccount.findFirst({
+      where: {
+        region,
+        type,
+      },
+    });
+
+    return PrismaLeagueAccountsMapper.toDomain(account);
+  }
+
+  public async findOneManagerWithNonExpiredSessionQueueTokenByRegion(
+    region: string,
+  ): Promise<LeagueAccountDomain> {
+    const account = await this.prisma.leagueAccount.findFirst({
+      where: {
+        region,
+        type: 'MANAGER',
+        sessionQueueTokenExpireAt: {
+          gt: new Date(),
+        },
+      },
+    });
+
+    return PrismaLeagueAccountsMapper.toDomain(account);
+  }
+
+  public async upsertOne(
+    leagueAccountDomain: LeagueAccountDomain,
   ): Promise<LeagueAccountDomain> {
     const account = await this.prisma.leagueAccount.upsert({
       where: {
-        id,
+        id: leagueAccountDomain.id,
       },
       update: {
-        password,
-        region,
-        ip,
-        rp,
-        partnerToken,
-        partnerTokenExpireAt,
+        password: leagueAccountDomain.password,
+        region: leagueAccountDomain.region,
+        ip: leagueAccountDomain.ip,
+        rp: leagueAccountDomain.rp,
+        partnerToken: leagueAccountDomain.partnerToken,
+        partnerTokenExpireAt: leagueAccountDomain.partnerTokenExpireAt,
+        userInfoToken: leagueAccountDomain.userInfoToken,
+        sessionQueueToken: leagueAccountDomain.sessionQueueToken,
+        sessionQueueTokenExpireAt:
+          leagueAccountDomain.sessionQueueTokenExpireAt,
       },
       create: {
-        id,
-        username,
-        password,
-        region,
-        ip,
-        rp,
-        partnerToken,
-        partnerTokenExpireAt,
+        id: leagueAccountDomain.id,
+        username: leagueAccountDomain.username,
+        password: leagueAccountDomain.password,
+        region: leagueAccountDomain.region,
+        ip: leagueAccountDomain.ip,
+        rp: leagueAccountDomain.rp,
+        type: leagueAccountDomain.type,
+        partnerToken: leagueAccountDomain.partnerToken,
+        partnerTokenExpireAt: leagueAccountDomain.partnerTokenExpireAt,
+        userInfoToken: leagueAccountDomain.userInfoToken,
+        sessionQueueToken: leagueAccountDomain.sessionQueueToken,
+        sessionQueueTokenExpireAt:
+          leagueAccountDomain.sessionQueueTokenExpireAt,
       },
     });
 

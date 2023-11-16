@@ -1,4 +1,5 @@
 import { Exclude } from 'class-transformer';
+import { LeagueAccountType } from '../enums/league.account.type.enum';
 
 export class LeagueAccountDomain {
   public id: string;
@@ -8,10 +9,17 @@ export class LeagueAccountDomain {
   public password: string;
   public rp: number;
   public ip: number;
+  public type: keyof typeof LeagueAccountType;
   @Exclude()
   public partnerToken: string;
   @Exclude()
   public partnerTokenExpireAt: Date;
+  @Exclude()
+  public userInfoToken?: string;
+  @Exclude()
+  public sessionQueueToken?: string;
+  @Exclude()
+  public sessionQueueTokenExpireAt?: Date;
   @Exclude()
   public createdAt: Date;
   @Exclude()
@@ -23,5 +31,10 @@ export class LeagueAccountDomain {
 
   public partnerTokenIsExpired(): boolean {
     return this.partnerTokenExpireAt.getTime() < Date.now();
+  }
+
+  public sessionQueueTokenIsExpired(): boolean {
+    if (!this.sessionQueueToken) return true;
+    return this.sessionQueueTokenExpireAt.getTime() < Date.now();
   }
 }
