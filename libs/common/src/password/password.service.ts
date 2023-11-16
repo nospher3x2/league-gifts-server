@@ -1,4 +1,4 @@
-import * as bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcrypt';
 
 export class PasswordService {
   public hashPassword(password: string): Promise<string> {
