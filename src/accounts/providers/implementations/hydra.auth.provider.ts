@@ -66,7 +66,7 @@ export class HydraAuthProvider implements AuthProvider {
       puuid,
       region,
       partnerToken,
-      partnerTokenExpireAt: new Date(expiryTimestamp),
+      partnerTokenExpireAt: new Date(expiryTimestamp * 1000),
     };
   }
 }

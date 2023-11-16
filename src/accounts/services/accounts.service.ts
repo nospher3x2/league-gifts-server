@@ -11,6 +11,7 @@ import { HttpService } from '@nestjs/axios';
 import { LeagueAccountsRepository } from '../repositories/league.accounts.repository';
 import { AuthProvider } from '../providers/auth.provider';
 import { ISummoner } from '../interfaces/ISummoner';
+import { LeagueAccountType } from '../enums/league.account.type.enum';
 
 @Injectable()
 export class AccountsService {
@@ -20,6 +21,10 @@ export class AccountsService {
     private readonly accountsRepository: LeagueAccountsRepository,
     private readonly authProvider: AuthProvider,
   ) {}
+
+  public async findAll(): Promise<LeagueAccountDomain[]> {
+    return this.accountsRepository.findAll();
+  }
 
   public async findOneManagerAccount(
     region: string,
@@ -44,32 +49,25 @@ export class AccountsService {
       );
     }
 
-    const authResponse = await this.authProvider.handle(
+    return await this.authenticate(
       managerAccount.username,
       managerAccount.password,
+      'MANAGER',
     );
-
-    managerAccount.partnerToken = authResponse.partnerToken;
-    managerAccount.partnerTokenExpireAt = authResponse.partnerTokenExpireAt;
-
-    const userInfoToken = await this.getAccountUserInfoToken(account);
-    account.userInfoToken = userInfoToken;
-
-    const sessionQueueToken = await this.getAccountSessionQueueToken(account);
-    account.sessionQueueToken = sessionQueueToken.sessionQueueToken;
-    account.sessionQueueTokenExpireAt =
-      sessionQueueToken.sessionQueueTokenExpireAt;
-
-    return this.accountsRepository.upsertOne(account);
   }
 
   public async authenticate(
     username: string,
     password: string,
+    type: keyof typeof LeagueAccountType = 'GIFT',
   ): Promise<LeagueAccountDomain> {
     const storedAccount =
       await this.accountsRepository.findOneByUsername(username);
     if (storedAccount && !storedAccount.partnerTokenIsExpired()) {
+      if (type === 'MANAGER' && storedAccount.sessionQueueTokenIsExpired()) {
+        await this.authenticateOnLedge(storedAccount);
+      }
+
       return storedAccount;
     }
 
@@ -81,14 +79,37 @@ export class AccountsService {
       password,
       partnerToken: authResponse.partnerToken,
       partnerTokenExpireAt: authResponse.partnerTokenExpireAt,
-      type: 'GIFT',
+      type,
     });
 
     const wallet = await this.getAccountWallet(account);
     account.ip = wallet.ip;
     account.rp = wallet.rp;
 
+    if (type === 'MANAGER') {
+      const userInfoToken = await this.getAccountUserInfoToken(account);
+      account.userInfoToken = userInfoToken;
+
+      const sessionQueueToken = await this.getAccountSessionQueueToken(account);
+      account.sessionQueueToken = sessionQueueToken.sessionQueueToken;
+      account.sessionQueueTokenExpireAt =
+        sessionQueueToken.sessionQueueTokenExpireAt;
+    }
+
+    console.log(account);
     return this.accountsRepository.upsertOne(account);
+  }
+
+  public async authenticateOnLedge(
+    account: LeagueAccountDomain,
+  ): Promise<void> {
+    const userInfoToken = await this.getAccountUserInfoToken(account);
+    account.userInfoToken = userInfoToken;
+
+    const sessionQueueToken = await this.getAccountSessionQueueToken(account);
+    account.sessionQueueToken = sessionQueueToken.sessionQueueToken;
+    account.sessionQueueTokenExpireAt =
+      sessionQueueToken.sessionQueueTokenExpireAt;
   }
 
   public async getAccountUserInfoToken(
@@ -128,7 +149,7 @@ export class AccountsService {
     const session = await firstValueFrom(
       this.httpService
         .post(
-          `${this.configService.getLedgeUrlByRegion(
+          `${this.configService.getLoginQueueUrlByRegion(
             account.region,
           )}/login-queue/v2/login/products/lol/regions/${account.region}`,
           {
@@ -166,7 +187,7 @@ export class AccountsService {
     const token = await firstValueFrom(
       this.httpService
         .post<string>(
-          `${this.configService.getLedgeUrlByRegion(
+          `${this.configService.getLoginQueueUrlByRegion(
             account.region,
           )}/session-external/v1/session/create`,
           {
@@ -212,7 +233,7 @@ export class AccountsService {
     return this.handleLedgeRequest<ISummoner>(
       account,
       'GET',
-      `/summoner-ledge/v1/regions/${
+      `summoner-ledge/v1/regions/${
         account.region
       }/summoners/name/${encodeURIComponent(summonerName)}`,
     );
@@ -224,7 +245,7 @@ export class AccountsService {
     return this.handleLedgeRequest<{ ip: number; rp: number }>(
       account,
       'GET',
-      '/storefront/v2/wallet',
+      'storefront/v2/wallet',
     );
   }
 
@@ -234,7 +255,7 @@ export class AccountsService {
     return this.handleLedgeRequest<any[]>(
       account,
       'GET',
-      '/storefront/v1/offers',
+      'storefront/v1/offers',
     );
   }
 

@@ -2,6 +2,8 @@ import { LeagueAccountDomain } from '../entities/league.account.domain';
 import { LeagueAccountType } from '../enums/league.account.type.enum';
 
 export abstract class LeagueAccountsRepository {
+  public abstract findAll(): Promise<LeagueAccountDomain[]>;
+
   public abstract findOneById(id: string): Promise<LeagueAccountDomain | null>;
 
   public abstract findOneByUsername(

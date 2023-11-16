@@ -14,8 +14,12 @@ export class PrismaLeagueAccountsMapper {
       region: account.region,
       rp: account.rp,
       ip: account.ip,
+      type: account.type,
       partnerToken: account.partnerToken,
       partnerTokenExpireAt: account.partnerTokenExpireAt,
+      userInfoToken: account.userInfoToken,
+      sessionQueueToken: account.sessionQueueToken,
+      sessionQueueTokenExpireAt: account.sessionQueueTokenExpireAt,
       createdAt: account.createdAt,
       updatedAt: account.updatedAt,
     });

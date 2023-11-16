@@ -11,6 +11,11 @@ export class PrismaLeagueAccountsRepository
 {
   constructor(private readonly prisma: PrismaService) {}
 
+  public async findAll(): Promise<LeagueAccountDomain[]> {
+    const accounts = await this.prisma.leagueAccount.findMany();
+    return accounts.map(PrismaLeagueAccountsMapper.toDomain);
+  }
+
   public async findOneById(id: string): Promise<LeagueAccountDomain> {
     const account = await this.prisma.leagueAccount.findUnique({
       where: {
@@ -75,6 +80,7 @@ export class PrismaLeagueAccountsRepository
         region: leagueAccountDomain.region,
         ip: leagueAccountDomain.ip,
         rp: leagueAccountDomain.rp,
+        type: leagueAccountDomain.type,
         partnerToken: leagueAccountDomain.partnerToken,
         partnerTokenExpireAt: leagueAccountDomain.partnerTokenExpireAt,
         userInfoToken: leagueAccountDomain.userInfoToken,

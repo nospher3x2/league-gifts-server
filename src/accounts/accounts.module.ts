@@ -8,9 +8,11 @@ import { LeagueAccountsRepository } from './repositories/league.accounts.reposit
 import { PrismaLeagueAccountsRepository } from './repositories/implementations/prisma.league.account.repository';
 import { AuthProvider } from './providers/auth.provider';
 import { HydraAuthProvider } from './providers/implementations/hydra.auth.provider';
+import { AccountsController } from './controller/accounts.controller';
 
 @Module({
   imports: [ConfigModule, HttpModule, DatabaseModule],
+  controllers: [AccountsController],
   providers: [
     AccountsServiceConfig,
     AccountsService,
