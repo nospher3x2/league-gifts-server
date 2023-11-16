@@ -58,7 +58,7 @@ model Recipient {
   status                RecipientStatus @default(PENDING)
   user                  User            @relation(fields: [userId], references: [id])
   orders                Order[]
-  userId                String          @unique @map("user_id")
+  userId                String          @map("user_id")
   createdAt             DateTime        @default(now()) @map("created_at")
   updatedAt             DateTime        @updatedAt @map("updated_at")
 }
