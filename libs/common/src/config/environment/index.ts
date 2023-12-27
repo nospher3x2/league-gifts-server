@@ -69,5 +69,6 @@ export default () => ({
       PH2: 'https://ph2-red.lol.sgp.pvp.net',
       VN2: 'https://vn2-red.lol.sgp.pvp.net',
     },
+    riot_games_account_api_url: 'https://api.account.riotgames.com',
   },
 });
