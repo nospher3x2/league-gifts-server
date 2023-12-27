@@ -11,7 +11,7 @@ import { plainToInstance } from 'class-transformer';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Get('me')
+  @Get('@me')
   public async getCurrentUser(
     @User() user: UserDomain,
   ): Promise<CustomResponse<UserDomain>> {
