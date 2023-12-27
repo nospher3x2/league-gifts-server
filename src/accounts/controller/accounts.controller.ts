@@ -22,13 +22,10 @@ export class AccountsController {
   public async authenticate(
     @Body() authenticateAccountDto: AuthenticateAccountDto,
   ) {
-    return plainToInstance(
-      LeagueAccountDomain,
-      await this.accountsService.authenticate(
-        authenticateAccountDto.username,
-        authenticateAccountDto.password,
-        authenticateAccountDto.type,
-      ),
+    return await this.accountsService.authenticate(
+      authenticateAccountDto.username,
+      authenticateAccountDto.password,
+      authenticateAccountDto.type,
     );
   }
 }

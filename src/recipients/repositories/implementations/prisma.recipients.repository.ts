@@ -13,6 +13,9 @@ export class PrismaRecipientsRepository implements RecipientsRepository {
     const recipients = await this.prisma.recipient.findMany({
       where: {
         userId,
+        NOT: {
+          status: 'REMOVED',
+        },
       },
     });
 
@@ -31,6 +34,27 @@ export class PrismaRecipientsRepository implements RecipientsRepository {
       where: {
         id,
         userId,
+        NOT: {
+          status: 'REMOVED',
+        },
+      },
+    });
+
+    if (!recipient) {
+      return null;
+    }
+
+    return PrismaRecipientsMapper.toDomain(recipient);
+  }
+
+  public async findOneByPuuidAndUserId(
+    puuid: string,
+    userId: string,
+  ): Promise<RecipientDomain | null> {
+    const recipient = await this.prisma.recipient.findFirst({
+      where: {
+        puuid,
+        userId,
       },
     });
 
@@ -48,6 +72,9 @@ export class PrismaRecipientsRepository implements RecipientsRepository {
     return this.prisma.recipient.count({
       where: {
         userId,
+        NOT: {
+          status: 'REMOVED',
+        },
       },
       take: limit,
     });
@@ -61,6 +88,9 @@ export class PrismaRecipientsRepository implements RecipientsRepository {
       where: {
         puuid,
         userId,
+        NOT: {
+          status: 'REMOVED',
+        },
       },
       take: 1,
     });

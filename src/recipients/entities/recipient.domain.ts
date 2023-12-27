@@ -1,11 +1,12 @@
 import { Exclude } from 'class-transformer';
 import { RecipientStatus } from '../enums/recipient.status.enum';
 import { randomUUID } from 'crypto';
+import { LeagueAccountRegion } from 'src/accounts/enums/league.account.region.enum';
 
 export class RecipientDomain {
   public id: string;
   public name: string;
-  public region: string;
+  public region: keyof typeof LeagueAccountRegion;
   public profileIconId: number;
   public requiredProfileIconId: number;
   @Exclude()
@@ -26,7 +27,15 @@ export class RecipientDomain {
     }
   }
 
+  public isPending(): boolean {
+    return this.status === RecipientStatus.PENDING;
+  }
+
   public isVerified(): boolean {
     return this.status === RecipientStatus.VERIFIED;
+  }
+
+  public isRemoved(): boolean {
+    return this.status === RecipientStatus.REMOVED;
   }
 }

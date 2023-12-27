@@ -8,6 +8,11 @@ export abstract class RecipientsRepository {
     userId: string,
   ): Promise<RecipientDomain | null>;
 
+  public abstract findOneByPuuidAndUserId(
+    puuid: string,
+    userId: string,
+  ): Promise<RecipientDomain | null>;
+
   public abstract countManyByUserId(
     userId: string,
     limit: number,

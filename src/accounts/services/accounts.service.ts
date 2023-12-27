@@ -10,8 +10,8 @@ import { catchError, firstValueFrom, map } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { LeagueAccountsRepository } from '../repositories/league.accounts.repository';
 import { AuthProvider } from '../providers/auth.provider';
-import { ISummoner } from '../interfaces/ISummoner';
 import { LeagueAccountType } from '../enums/league.account.type.enum';
+import { Summoner } from '../interfaces/Summoner';
 
 @Injectable()
 export class AccountsService {
@@ -226,17 +226,53 @@ export class AccountsService {
     };
   }
 
-  public async getSummonerByName(
+  public async getAliasesByGameNameAndTagLine(
     account: LeagueAccountDomain,
-    summonerName: string,
-  ): Promise<ISummoner> {
-    return this.handleLedgeRequest<ISummoner>(
+    gameName: string,
+    tagLine: string,
+  ): Promise<{ puuid: string }> {
+    return await firstValueFrom(
+      this.httpService
+        .get<{ puuid: string }[]>(
+          `${this.configService.riotGamesAccountApiUrl}/aliases/v1/aliases`,
+          {
+            params: {
+              gameName,
+              tagLine,
+            },
+            headers: {
+              Authorization: `Bearer ${account.partnerToken}`,
+            },
+          },
+        )
+        .pipe(
+          map((response) => response.data[0]),
+          catchError((error) => {
+            const data = error?.response?.data || error.response;
+            throw new HttpException(
+              data.message || data,
+              error.response.status,
+              {
+                description: data.errorCode || data,
+                cause: error,
+              },
+            );
+          }),
+        ),
+    );
+  }
+
+  public async getSummonerByPuuid(
+    account: LeagueAccountDomain,
+    puuid: string,
+  ): Promise<Summoner> {
+    return this.handleLedgeRequest<Summoner[]>(
       account,
       'GET',
       `summoner-ledge/v1/regions/${
         account.region
-      }/summoners/name/${encodeURIComponent(summonerName)}`,
-    );
+      }/summoners/puuids/${encodeURIComponent(puuid)}`,
+    ).then((summoners) => summoners[0]);
   }
 
   public async getAccountWallet(

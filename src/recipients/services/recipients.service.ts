@@ -9,6 +9,7 @@ import { RecipientDomain } from '../entities/recipient.domain';
 import { CreateRecipientDto } from '../dtos/create.recipient.dto';
 import { AccountsService } from 'src/accounts/services/accounts.service';
 import { randomUUID } from 'crypto';
+import { RecipientStatus } from '../enums/recipient.status.enum';
 
 @Injectable()
 export class RecipientsService {
@@ -28,23 +29,18 @@ export class RecipientsService {
     return this.recipientsRepository.findOneByIdAndUserId(id, userId);
   }
 
+  public async findOneByPuuidAndUserId(
+    puuid: string,
+    userId: string,
+  ): Promise<RecipientDomain | null> {
+    return this.recipientsRepository.findOneByPuuidAndUserId(puuid, userId);
+  }
+
   public async countManyByUserId(
     userId: string,
     limit: number,
   ): Promise<number> {
     return this.recipientsRepository.countManyByUserId(userId, limit);
-  }
-
-  public async checkIfRecipientExistsByPuuidAndUserId(
-    puuid: string,
-    userId: string,
-  ): Promise<boolean> {
-    const count = await this.recipientsRepository.countOneByPuuidAndUserId(
-      puuid,
-      userId,
-    );
-
-    return count === 1;
   }
 
   public async createOne(
@@ -54,7 +50,7 @@ export class RecipientsService {
     const recipientsCount = await this.countManyByUserId(userId, 3);
     if (recipientsCount >= 3) {
       throw new BadRequestException(
-        `You can only have 3 recipients, please delete one and try again`,
+        `You can only have 3 recipients active at the same time. Please remove one and try again.`,
       );
     }
 
@@ -62,33 +58,60 @@ export class RecipientsService {
       createRecipientDto.region,
     );
 
-    const summoner = await this.accountsService.getSummonerByName(
+    const [gameName, tagLine] = createRecipientDto.name.split('#');
+    const aliases = await this.accountsService.getAliasesByGameNameAndTagLine(
       manager,
-      createRecipientDto.name,
+      gameName,
+      tagLine,
+    );
+
+    if (!aliases) {
+      throw new NotFoundException(
+        `Summoner ${createRecipientDto.name} not found, please check if the name and tag is correct and try again.`,
+      );
+    }
+
+    const summoner = await this.accountsService.getSummonerByPuuid(
+      manager,
+      aliases.puuid,
     );
 
     if (!summoner) {
       throw new NotFoundException(
-        `Summoner ${createRecipientDto.name} not found, please check the name and the region and try again`,
+        `Summoner ${createRecipientDto.name} not found, please check the region selected and try again.`,
       );
     }
 
-    const alreadyExistsRecipientWithSamePuuid =
-      await this.checkIfRecipientExistsByPuuidAndUserId(summoner.puuid, userId);
+    const requiredProfileIconId = summoner.profileIconId === 7 ? 6 : 7;
+    const alreadyCreatedRecipient = await this.findOneByPuuidAndUserId(
+      summoner.puuid,
+      userId,
+    );
 
-    if (alreadyExistsRecipientWithSamePuuid) {
-      throw new ConflictException('Recipient with same puuid already exists');
+    if (alreadyCreatedRecipient) {
+      if (alreadyCreatedRecipient.isRemoved()) {
+        alreadyCreatedRecipient.status = RecipientStatus.PENDING;
+        alreadyCreatedRecipient.requiredProfileIconId = requiredProfileIconId;
+        return this.recipientsRepository.saveOne(alreadyCreatedRecipient);
+      }
+
+      const status = alreadyCreatedRecipient.isVerified()
+        ? 'verified'
+        : 'pending';
+
+      throw new ConflictException(
+        `Recipient ${createRecipientDto.name} is already ${status}.`,
+      );
     }
 
-    const requiredProfileIconId = summoner.profileIconId === 7 ? 6 : 7;
     const recipient = new RecipientDomain({
       id: randomUUID(),
-      name: summoner.name,
+      name: createRecipientDto.name,
       region: createRecipientDto.region,
       puuid: summoner.puuid,
       profileIconId: summoner.profileIconId,
       requiredProfileIconId: requiredProfileIconId,
-      status: 'PENDING',
+      status: RecipientStatus.PENDING,
       userId: userId,
     });
 
@@ -100,7 +123,6 @@ export class RecipientsService {
     userId: string,
   ): Promise<RecipientDomain> {
     const recipient = await this.findOneByIdAndUserId(recipientId, userId);
-
     if (!recipient) {
       throw new NotFoundException('Recipient not found');
     }
@@ -113,7 +135,7 @@ export class RecipientsService {
       recipient.region,
     );
 
-    const summoner = await this.accountsService.getSummonerByName(
+    const summoner = await this.accountsService.getSummonerByPuuid(
       manager,
       recipient.name,
     );
@@ -126,7 +148,7 @@ export class RecipientsService {
     }
 
     recipient.name = summoner.name;
-    recipient.status = 'VERIFIED';
+    recipient.status = RecipientStatus.VERIFIED;
     return this.recipientsRepository.saveOne(recipient);
   }
 
@@ -134,6 +156,16 @@ export class RecipientsService {
     const recipient = await this.findOneByIdAndUserId(recipientId, userId);
     if (!recipient) {
       throw new NotFoundException('Recipient not found');
+    }
+
+    if (recipient.isRemoved()) {
+      throw new ConflictException('Recipient is already removed');
+    }
+
+    if (recipient.isVerified()) {
+      recipient.status = 'REMOVED';
+      await this.recipientsRepository.saveOne(recipient);
+      return;
     }
 
     await this.recipientsRepository.deleteOneByIdAndUserId(recipientId, userId);
