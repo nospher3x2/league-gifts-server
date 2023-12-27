@@ -6,6 +6,7 @@ import { CreateStoreItemDto } from '../dtos/create.store.item.dto';
 import { StoreItemDomain } from '../entities/store.item.domain';
 import { StoreItemPriceConfig } from '../config/store.item.price.config';
 import { AccountsService } from 'src/accounts/services/accounts.service';
+import { LeagueAccountRegion } from 'src/accounts/enums/league.account.region.enum';
 
 @Injectable()
 export class StoreService {
@@ -112,12 +113,11 @@ export class StoreService {
   public getFlatItemPriceByRegion(
     price: number,
     currency: keyof typeof StoreItemCurrency,
-    region: string,
+    region: keyof typeof LeagueAccountRegion,
   ) {
-    const currencyPrice = new Decimal(
+    return Decimal.mul(
+      price,
       this.storeItemPriceConfig.getCurrencyPriceByRegion(currency, region),
-    );
-
-    return Decimal.mul(price, currencyPrice).toNumber();
+    ).toNumber();
   }
 }
