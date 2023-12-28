@@ -19,6 +19,7 @@ import { ResponseTransformInterceptor } from '@common/interceptors/response-tran
 import { AccountsModule } from './accounts/accounts.module';
 import { StoreModule } from './store/store.module';
 import { RecipientsModule } from './recipients/recipients.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { RecipientsModule } from './recipients/recipients.module';
     AccountsModule,
     StoreModule,
     RecipientsModule,
+    OrdersModule,
   ],
   controllers: [],
   providers: [
