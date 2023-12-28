@@ -4,21 +4,24 @@ services:
       dockerfile: Dockerfile
       context: .
       target: development
+    restart: unless-stopped
     env_file:
         - .env
     environment:
       DATABASE_URL: mysql://${MYSQL_USERNAME}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}?createDatabaseIfNotExist=true
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:${REDIS_PORT}
     volumes:
       - .:/usr/src/app
     command: yarn start:dev
     ports:
-      - 4000:4000
+      - ${PORT}:${PORT}
     depends_on:
       - redis
       - mysql
   redis: # Name of container
     image: arm64v8/redis
     restart: always
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD} --port ${REDIS_PORT}
     volumes: 
       - redis:/data
   mysql:

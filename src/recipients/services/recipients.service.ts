@@ -13,6 +13,8 @@ import { RecipientStatus } from '../enums/recipient.status.enum';
 
 @Injectable()
 export class RecipientsService {
+  private static readonly MAX_RECIPIENTS = 3;
+
   constructor(
     private readonly accountsService: AccountsService,
     private readonly recipientsRepository: RecipientsRepository,
@@ -48,9 +50,9 @@ export class RecipientsService {
     userId: string,
   ): Promise<RecipientDomain> {
     const recipientsCount = await this.countManyByUserId(userId, 3);
-    if (recipientsCount >= 3) {
+    if (recipientsCount >= RecipientsService.MAX_RECIPIENTS) {
       throw new BadRequestException(
-        `You can only have 3 recipients active at the same time. Please remove one and try again.`,
+        `You can only have 3 recipients  at the same time. Please remove one and try again.`,
       );
     }
 
@@ -82,9 +84,14 @@ export class RecipientsService {
       );
     }
 
-    const requiredProfileIconId = summoner.profileIconId === 7 ? 6 : 7;
+    const randomProfileIconId = Math.floor(Math.random() * 26) + 1;
+    const requiredProfileIconId =
+      summoner.profileIconId === randomProfileIconId
+        ? randomProfileIconId - 1
+        : randomProfileIconId;
+
     const alreadyCreatedRecipient = await this.findOneByPuuidAndUserId(
-      summoner.puuid,
+      aliases.puuid,
       userId,
     );
 
@@ -108,7 +115,7 @@ export class RecipientsService {
       id: randomUUID(),
       name: createRecipientDto.name,
       region: createRecipientDto.region,
-      puuid: summoner.puuid,
+      puuid: aliases.puuid,
       profileIconId: summoner.profileIconId,
       requiredProfileIconId: requiredProfileIconId,
       status: RecipientStatus.PENDING,

@@ -3,7 +3,7 @@ import {
   Module,
   ValidationPipe,
 } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { LoggerModule } from 'nestjs-pino';
 import { randomUUID } from 'crypto';
@@ -19,6 +19,9 @@ import { ResponseTransformInterceptor } from '@common/interceptors/response-tran
 import { AccountsModule } from './accounts/accounts.module';
 import { StoreModule } from './store/store.module';
 import { RecipientsModule } from './recipients/recipients.module';
+import { CacheModule } from '@nestjs/cache-manager';
+import { RedisClientOptions } from 'redis';
+import { redisStore } from 'cache-manager-redis-yet';
 
 @Module({
   imports: [
@@ -51,6 +54,14 @@ import { RecipientsModule } from './recipients/recipients.module';
       expandVariables: true,
       // envFilePath:
       //   process.env.NODE_ENV === 'production' ? '.env' : '.env.development',
+    }),
+    CacheModule.registerAsync<RedisClientOptions>({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => ({
+        store: redisStore,
+        url: config.getOrThrow<string>('database.redis.url'),
+      }),
+      inject: [ConfigService],
     }),
     DatabaseModule,
     UsersModule,
