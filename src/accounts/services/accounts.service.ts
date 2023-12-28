@@ -285,13 +285,15 @@ export class AccountsService {
     );
   }
 
-  public async getAccountStoreOffers(
+  public async getAccountStoreCatalog(
     account: LeagueAccountDomain,
   ): Promise<any[]> {
     return this.handleLedgeRequest<any[]>(
       account,
       'GET',
-      'storefront/v1/offers',
+      `storefront/v1/catalog?region=${encodeURIComponent(
+        account.region,
+      )}&language=en_US`,
     );
   }
 

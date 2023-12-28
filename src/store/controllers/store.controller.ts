@@ -27,7 +27,7 @@ export class StoreController {
     @Query('region', new ParseEnumPipe(LeagueAccountRegion))
     region: keyof typeof LeagueAccountRegion,
   ): Promise<StoreItemWithFlatPrice[]> {
-    const items = await this.storeService.findAllActiveItems();
+    const items = await this.storeService.findAllStoreItems();
     return items.map((item) => {
       const itemInstance = plainToInstance(StoreItemDomain, item);
       return {
@@ -41,15 +41,15 @@ export class StoreController {
     });
   }
 
-  @Get('items/:id')
+  @Get('items/:offerId')
   public async getItemById(
-    @Param('id') id: string,
+    @Param('offerId') offerId: string,
     @Query('region', new ParseEnumPipe(LeagueAccountRegion))
     region: keyof typeof LeagueAccountRegion,
   ): Promise<StoreItemWithFlatPrice> {
     const item = plainToInstance(
       StoreItemDomain,
-      await this.storeService.findOneActiveItemById(id),
+      await this.storeService.findOneStoreItemByOfferId(offerId),
     );
 
     return {
@@ -62,9 +62,8 @@ export class StoreController {
     };
   }
 
-  @Post('items/reload')
-  public async reloadItems(): Promise<void> {
-    // await this.storeService.recreateAllItems();
-    // return {};
+  @Post('items/repopulate')
+  public async repopulate(): Promise<void> {
+    await this.storeService.repopulateStoreItemsCache();
   }
 }
