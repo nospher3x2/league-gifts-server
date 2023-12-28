@@ -58,7 +58,6 @@ export class StoreService {
   public async findAllStoreItems(): Promise<StoreItemDomain[]> {
     const cachedItems = await this.storeItemCache.findAllItems();
     if (cachedItems) {
-      console.log('Using cached items');
       return cachedItems;
     }
 
@@ -112,9 +111,8 @@ export class StoreService {
       );
     }
 
-    const offers = await this.accountsService.getAccountStoreCatalog(account);
-
     const catalog: StoreItemDomain[] = [];
+    const offers = await this.accountsService.getAccountStoreCatalog(account);
     for (const offer of offers) {
       if (!offer.active) {
         continue;
@@ -126,7 +124,13 @@ export class StoreService {
         (!offer.tags || !offer.tags.includes('tft'));
 
       if (isHextech) {
-        continue;
+        if (!offer.bundleItems || offer.bundleItems.length === 0) {
+          continue;
+        }
+
+        if (offer.bundleItems[0].item.inventoryType !== 'EVENT_PASS') {
+          continue;
+        }
       }
 
       const name = this.getItemName(offer);
