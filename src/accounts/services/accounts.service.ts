@@ -287,13 +287,12 @@ export class AccountsService {
 
   public async getAccountStoreCatalog(
     account: LeagueAccountDomain,
+    language = 'en_US',
   ): Promise<any[]> {
     return this.handleLedgeRequest<any[]>(
       account,
       'GET',
-      `storefront/v1/catalog?region=${encodeURIComponent(
-        account.region,
-      )}&language=en_US`,
+      `storefront/v1/catalog?region=${account.region}&language=${language}`,
     );
   }
 

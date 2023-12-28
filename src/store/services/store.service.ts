@@ -111,6 +111,7 @@ export class StoreService {
       );
     }
 
+    // TO-DO: Use i18n to get the item name in the user language
     const catalog: StoreItemDomain[] = [];
     const offers = await this.accountsService.getAccountStoreCatalog(account);
     for (const offer of offers) {
@@ -233,6 +234,8 @@ export class StoreService {
     return Decimal.mul(
       price,
       this.storeItemPriceConfig.getCurrencyPriceByRegion(currency, region),
-    ).toNumber();
+    )
+      .toDecimalPlaces(2, Decimal.ROUND_DOWN)
+      .toNumber();
   }
 }
