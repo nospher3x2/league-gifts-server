@@ -5,8 +5,8 @@ import {
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { LoggerModule } from 'nestjs-pino';
-import { randomUUID } from 'crypto';
+// import { LoggerModule } from 'nestjs-pino';
+// import { randomUUID } from 'crypto';
 
 import { DatabaseModule } from '@common';
 import enviromentConfig from '@common/config/environment';
@@ -20,27 +20,28 @@ import { AccountsModule } from './accounts/accounts.module';
 import { StoreModule } from './store/store.module';
 import { RecipientsModule } from './recipients/recipients.module';
 import { OrdersModule } from './orders/orders.module';
+import { randomUUID } from 'crypto';
+import { LoggerModule } from 'nestjs-pino';
 
 @Module({
   imports: [
-    LoggerModule.forRoot({
-      pinoHttp: {
-        genReqId: (request, response) => {
-          const existingId = request.id ?? request.headers['x-request-id'];
-          if (existingId) return existingId;
-
-          const id = randomUUID();
-          response.setHeader('X-Request-Id', id);
-          return id;
-        },
-        transport: {
-          target: 'pino-pretty',
-          options: {
-            singleLine: true,
-          },
-        },
-      },
-    }),
+    // LoggerModule.forRoot({
+    // pinoHttp: {
+    //   genReqId: (request, response) => {
+    //     const existingId = request.id ?? request.headers['x-request-id'];
+    //     if (existingId) return existingId;
+    //     const id = randomUUID();
+    //     response.setHeader('X-Request-Id', id);
+    //     return id;
+    //   },
+    //   transport: {
+    //     target: 'pino-pretty',
+    //     options: {
+    //       singleLine: true,
+    //     },
+    //   },
+    // },
+    // }),
     ConfigModule.forRoot({
       cache: true,
       load: [enviromentConfig],

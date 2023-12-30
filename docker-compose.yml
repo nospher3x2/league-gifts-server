@@ -8,7 +8,7 @@ services:
     env_file:
         - .env
     environment:
-      DATABASE_URL: mysql://${MYSQL_USERNAME}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}?createDatabaseIfNotExist=true
+      DATABASE_URL: mysql://${MYSQL_USERNAME}:${MYSQL_PASSWORD}@168.138.131.182:${MYSQL_PORT}/${MYSQL_DATABASE}?createDatabaseIfNotExist=true
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:${REDIS_PORT}
     volumes:
       - .:/usr/src/app

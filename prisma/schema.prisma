@@ -159,17 +159,17 @@ enum OrderTransactionStatus {
 }
 
 model OrderTransaction {
-  id     String                 @id @default(uuid()) // This id will be the same of riot games transaction id
+  id     String                 @id @default(uuid()) /// This id will be the same of riot games transaction id
   price  Float
   status OrderTransactionStatus
 
-  order   Order                @relation(fields: [orderId], references: [id])
-  item    OrderTransactionItem @relation(fields: [itemId], references: [id])
-  account LeagueAccount        @relation(fields: [senderAccountId], references: [id])
+  order  Order                @relation(fields: [orderId], references: [id])
+  item   OrderTransactionItem @relation(fields: [itemId], references: [id])
+  sender LeagueAccount?       @relation(fields: [senderId], references: [id])
 
-  orderId         String @map("order_id")
-  itemId          String @unique @map("item_id")
-  senderAccountId String @map("sender_account_id")
+  orderId  String  @map("order_id")
+  itemId   String  @unique @map("item_id")
+  senderId String? @map("sender_id")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -186,7 +186,7 @@ model OrderTransactionItem {
   currency         Currency
   price            Float
   offerId          String            @map("offer_id")
-  inventoryType    String            @default("") @map("inventory_type")
+  inventoryType    String            @map("inventory_type")
   subInventoryType String?           @default("") @map("sub_inventory_type")
   transaction      OrderTransaction?
   createdAt        DateTime          @default(now()) @map("created_at")

@@ -9,7 +9,7 @@ import { ResponseTransformInterceptor } from '@common/interceptors/response-tran
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  app.useLogger(app.get(Logger));
+  // app.useLogger(app.get(Logger));
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -17,7 +17,7 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-  app.useGlobalInterceptors(new LoggerErrorInterceptor());
+  // app.useGlobalInterceptors(new LoggerErrorInterceptor());
   app.useGlobalInterceptors(new ResponseTransformInterceptor());
   app.disable('x-powered-by');
 
