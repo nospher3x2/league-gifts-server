@@ -268,10 +268,9 @@ export class AccountsService {
   ): Promise<Summoner> {
     return this.handleLedgeRequest<Summoner[]>(
       account,
-      'GET',
-      `summoner-ledge/v1/regions/${
-        account.region
-      }/summoners/puuids/${encodeURIComponent(puuid)}`,
+      'POST',
+      `summoner-ledge/v1/regions/${account.region}/summoners/puuids`,
+      [puuid],
     ).then((summoners) => summoners[0]);
   }
 
