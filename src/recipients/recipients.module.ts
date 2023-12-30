@@ -16,5 +16,6 @@ import { PrismaRecipientsRepository } from './repositories/implementations/prism
     },
   ],
   controllers: [RecipientsController],
+  exports: [RecipientsService],
 })
 export class RecipientsModule {}

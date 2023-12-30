@@ -52,7 +52,7 @@ export class RecipientsService {
     const recipientsCount = await this.countManyByUserId(userId, 3);
     if (recipientsCount >= RecipientsService.MAX_RECIPIENTS) {
       throw new BadRequestException(
-        `You can only have 3 recipients  at the same time. Please remove one and try again.`,
+        `You can only have 3 recipients at the same time. Please remove one and try again.`,
       );
     }
 
@@ -144,11 +144,13 @@ export class RecipientsService {
 
     const summoner = await this.accountsService.getSummonerByPuuid(
       manager,
-      recipient.name,
+      recipient.puuid,
     );
 
-    const changed = summoner.profileIconId === recipient.requiredProfileIconId;
-    if (!changed) {
+    const requiredProfileIconIsSelected =
+      summoner.profileIconId === recipient.requiredProfileIconId;
+
+    if (!requiredProfileIconIsSelected) {
       throw new BadRequestException(
         `Recipient ${recipient.name} did not change profile icon to required icon (${recipient.requiredProfileIconId})`,
       );
