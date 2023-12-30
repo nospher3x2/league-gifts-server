@@ -6,4 +6,9 @@ export abstract class UsersRepository {
   public abstract findOneByEmail(email: string): Promise<UserDomain | null>;
   public abstract countOneByEmail(email: string): Promise<number>;
   public abstract createOne(createUserDto: CreateUserDto): Promise<UserDomain>;
+  public abstract decrementOneBalanceByIdAndCurrentBalance(
+    id: string,
+    balance: number,
+    currentBalance: number,
+  ): Promise<UserDomain>;
 }

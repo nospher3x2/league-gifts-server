@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '@common';
 import { CreateUserDto } from 'src/users/dtos/create.user.dto';
 import { UserDomain } from 'src/users/domain/user.domain';
-import { UserRole, UserStatus } from '@prisma/client';
+import { Prisma, UserRole, UserStatus } from '@prisma/client';
 import { UsersRepository } from '../users.repository';
 import { PrismaUsersMapper } from '../mappers/prisma.users.mapper';
 import { randomUUID } from 'crypto';
@@ -51,5 +51,53 @@ export class PrismaUsersRepository implements UsersRepository {
       },
     });
     return PrismaUsersMapper.toDomain(user);
+  }
+
+  public async decrementOneBalanceByIdAndCurrentBalance(
+    id: string,
+    balance: number,
+    currentBalance: number,
+  ): Promise<UserDomain> {
+    return await this.prisma.$transaction(
+      async (transaction) => {
+        const lockResult =
+          await transaction.$executeRaw`SELECT 1 FROM "User" WHERE id = ${id} AND balance = ${currentBalance} FOR UPDATE`;
+
+        if (lockResult === 0) {
+          throw new BadRequestException(
+            'Invalid current balance, please try again',
+          );
+        }
+
+        const user = await transaction.user.update({
+          data: {
+            balance: {
+              decrement: balance,
+            },
+          },
+          where: {
+            id,
+            balance: currentBalance,
+          },
+        });
+
+        if (!user) {
+          throw new BadRequestException(
+            'Failed to decrement balance, please try again',
+          );
+        }
+
+        if (user.balance < 0) {
+          throw new BadRequestException(
+            `${user.name} does not have enough balance`,
+          );
+        }
+
+        return PrismaUsersMapper.toDomain(user);
+      },
+      {
+        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      },
+    );
   }
 }

@@ -53,4 +53,16 @@ export class UsersService {
     delete user.password;
     return user;
   }
+
+  public async decrementOneBalanceByIdAndCurrentBalance(
+    id: string,
+    balance: number,
+    currentBalance: number, // Optimistic concurrency control
+  ): Promise<UserDomain> {
+    return this.usersRepository.decrementOneBalanceByIdAndCurrentBalance(
+      id,
+      balance,
+      currentBalance,
+    );
+  }
 }

@@ -21,7 +21,7 @@ export class UserDomain {
     Object.assign(this, partial);
   }
 
-  public hasSufficientBalance(amount: number): boolean {
-    return Decimal.sub(this.balance, amount).gte(0);
+  public hasSufficientBalance(amount: Decimal | number): boolean {
+    return new Decimal(this.balance).greaterThanOrEqualTo(amount);
   }
 }
