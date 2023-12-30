@@ -60,10 +60,11 @@ export class PrismaUsersRepository implements UsersRepository {
   ): Promise<UserDomain> {
     return await this.prisma.$transaction(
       async (transaction) => {
-        const lockResult =
-          await transaction.$executeRaw`SELECT 1 FROM "User" WHERE id = ${id} AND balance = ${currentBalance} FOR UPDATE`;
+        const lockResult: UserDomain[] = await transaction.$queryRaw`
+          SELECT * FROM User WHERE id = ${id} AND balance = ${currentBalance} LIMIT 1 FOR UPDATE;
+        `;
 
-        if (lockResult === 0) {
+        if (lockResult.length === 0) {
           throw new BadRequestException(
             'Invalid current balance, please try again',
           );
