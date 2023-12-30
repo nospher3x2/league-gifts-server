@@ -66,10 +66,35 @@ export class StoreService {
     return items;
   }
 
+  public async findAllStoreItemsByOfferId(
+    offerIds: string[],
+  ): Promise<StoreItemDomain[]> {
+    const catalog = await this.storeItemCache.findAllItems();
+    const items: StoreItemDomain[] = [];
+    for (const offerId of offerIds) {
+      const cachedItem =
+        await this.storeItemCache.findOneItemByOfferId(offerId);
+
+      if (cachedItem) {
+        items.push(cachedItem);
+        continue;
+      }
+
+      for (const item of catalog) {
+        if (item.offerId === offerId) {
+          items.push(item);
+          continue;
+        }
+      }
+    }
+
+    return items;
+  }
+
   public async findOneStoreItemByOfferId(
     offerId: string,
   ): Promise<StoreItemDomain> {
-    const cachedItem = await this.storeItemCache.findOneItemById(offerId);
+    const cachedItem = await this.storeItemCache.findOneItemByOfferId(offerId);
     if (cachedItem) {
       return cachedItem;
     }

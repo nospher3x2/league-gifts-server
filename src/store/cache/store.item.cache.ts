@@ -18,8 +18,8 @@ export class StoreItemCache {
     return JSON.parse(cachedItems);
   }
 
-  public async findOneItemById(id: string): Promise<any> {
-    return this.cacheManager.get(`${StoreItemCache.KEY}::${id}`);
+  public async findOneItemByOfferId(offerId: string): Promise<any> {
+    return this.cacheManager.get(`${StoreItemCache.KEY}::${offerId}`);
   }
 
   public async saveAllItems(items: StoreItemDomain[]): Promise<void> {
