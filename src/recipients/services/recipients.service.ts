@@ -156,7 +156,6 @@ export class RecipientsService {
       );
     }
 
-    recipient.name = summoner.name;
     recipient.status = RecipientStatus.VERIFIED;
     return this.recipientsRepository.saveOne(recipient);
   }
