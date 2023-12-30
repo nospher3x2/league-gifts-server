@@ -8,14 +8,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
-import { StoreItemDomain } from '../entities/store.item.domain';
+import {
+  StoreItemDomain,
+  StoreItemWithFlatPriceDomain,
+} from '../entities/store.item.domain';
 import { StoreService } from '../services/store.service';
 import { plainToInstance } from 'class-transformer';
 import { LeagueAccountRegion } from 'src/accounts/enums/league.account.region.enum';
-
-interface StoreItemWithFlatPrice extends StoreItemDomain {
-  flatPrice: number;
-}
 
 @Controller('store')
 @UseGuards(JwtAuthGuard)
@@ -26,7 +25,7 @@ export class StoreController {
   public async getItems(
     @Query('region', new ParseEnumPipe(LeagueAccountRegion))
     region: keyof typeof LeagueAccountRegion,
-  ): Promise<StoreItemWithFlatPrice[]> {
+  ): Promise<StoreItemWithFlatPriceDomain[]> {
     const items = await this.storeService.findAllStoreItems();
     return items.map((item) => {
       const itemInstance = plainToInstance(StoreItemDomain, item);
@@ -46,7 +45,7 @@ export class StoreController {
     @Param('offerId') offerId: string,
     @Query('region', new ParseEnumPipe(LeagueAccountRegion))
     region: keyof typeof LeagueAccountRegion,
-  ): Promise<StoreItemWithFlatPrice> {
+  ): Promise<StoreItemWithFlatPriceDomain> {
     const item = plainToInstance(
       StoreItemDomain,
       await this.storeService.findOneStoreItemByOfferId(offerId),

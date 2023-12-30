@@ -14,3 +14,12 @@ export class StoreItemDomain {
     Object.assign(this, partial);
   }
 }
+
+export class StoreItemWithFlatPriceDomain extends StoreItemDomain {
+  public flatPrice: number;
+
+  constructor(partial: Partial<StoreItemWithFlatPriceDomain>) {
+    super(partial);
+    Object.assign(this, partial);
+  }
+}
