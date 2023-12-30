@@ -33,7 +33,6 @@ model User {
   role       UserRole    @default(USER)
   status     UserStatus  @default(PENDING) // Pending = email not verified
   recipients Recipient[]
-  cart       Cart?
   orders     Order[]
 
   //tokens    Token[]
@@ -106,106 +105,90 @@ model Recipient {
 //   updatedAt DateTime       @updatedAt
 // }
 
-enum Currency {
-  IP
-  RP
-}
-
-enum StoreItemStatus {
-  ACTIVE
-  INACTIVE
-}
-
-model StoreItem {
-  id               String          @id @default(uuid())
-  name             String
-  iconUrl          String          @map("icon_url")
-  status           StoreItemStatus @default(ACTIVE)
-  currency         Currency
-  price            Float
-  offerId          String          @map("offer_id")
-  inventoryType    String          @default("") @map("inventory_type")
-  subInventoryType String?         @default("") @map("sub_inventory_type")
-  orders           OrderProduct[]
-  carts            Cart[]
-  createdAt        DateTime        @default(now()) @map("created_at")
-  updatedAt        DateTime        @updatedAt @map("updated_at")
-}
-
-model Cart {
-  id        String      @id @default(uuid())
-  items     StoreItem[]
-  user      User        @relation(fields: [userId], references: [id])
-  userId    String      @unique @map("user_id")
-  createdAt DateTime    @default(now()) @map("created_at")
-  updatedAt DateTime    @updatedAt @map("updated_at")
-}
-
 enum LeagueAccountType {
   GIFT
   MANAGER
 }
 
 model LeagueAccount {
-  id                        String            @id @default(uuid())
+  id                        String             @id @default(uuid())
   region                    String
   username                  String
   password                  String
   rp                        Int
   ip                        Int
-  partnerToken              String            @map("partner_token") @db.Text()
-  partnerTokenExpireAt      DateTime          @map("partner_token_expire_at")
-  userInfoToken             String?           @map("user_info_token") @db.Text()
-  sessionQueueToken         String?           @map("session_queue_token") @db.Text()
-  sessionQueueTokenExpireAt DateTime?         @map("session_queue_token_expire_at")
+  partnerToken              String             @map("partner_token") @db.Text()
+  partnerTokenExpireAt      DateTime           @map("partner_token_expire_at")
+  userInfoToken             String?            @map("user_info_token") @db.Text()
+  sessionQueueToken         String?            @map("session_queue_token") @db.Text()
+  sessionQueueTokenExpireAt DateTime?          @map("session_queue_token_expire_at")
   type                      LeagueAccountType
-  orders                    OrderProduct[]
-  createdAt                 DateTime          @default(now()) @map("created_at")
-  updatedAt                 DateTime          @updatedAt @map("updated_at")
+  orders                    OrderTransaction[]
+  createdAt                 DateTime           @default(now()) @map("created_at")
+  updatedAt                 DateTime           @updatedAt @map("updated_at")
 }
 
 enum OrderStatus {
   PENDING
-  FINISHED
+  PROCESSING
+  COMPLETED
   CANCELED
   FAILED
 }
 
 model Order {
-  id          String         @id @default(uuid())
-  totalAmount Float          @map("total_amount")
-  products    OrderProduct[]
-  status      OrderStatus    @default(PENDING)
-  recipient   Recipient      @relation(fields: [recipientId], references: [id])
-  user        User           @relation(fields: [userId], references: [id])
-  recipientId String         @map("recipient_id")
-  userId      String         @map("user_id")
-  createdAt   DateTime       @default(now()) @map("created_at")
-  updatedAt   DateTime       @updatedAt @map("updated_at")
+  id           String             @id @default(uuid())
+  transactions OrderTransaction[]
+  status       OrderStatus        @default(PENDING)
+  recipient    Recipient          @relation(fields: [recipientId], references: [id])
+  user         User               @relation(fields: [userId], references: [id])
 
-  @@map("orders")
+  recipientId String @map("recipient_id")
+  userId      String @map("user_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 }
 
-enum OrderProductStatus {
+enum OrderTransactionStatus {
+  PENDING
   ACCEPTED
   FULFILLMENT_SUCCESSFUL
   FAILED
   OTHER
 }
 
-model OrderProduct {
-  id              String             @id @default(uuid())
-  order           Order              @relation(fields: [orderId], references: [id])
-  item            StoreItem          @relation(fields: [itemId], references: [id])
-  account         LeagueAccount      @relation(fields: [senderAccountId], references: [id])
-  price           Float
-  status          OrderProductStatus
-  transactionId   String             @map("transaction_id")
-  orderId         String             @map("order_id")
-  itemId          String             @map("item_id")
-  senderAccountId String             @map("sender_account_id")
-  createdAt       DateTime           @default(now()) @map("created_at")
-  updatedAt       DateTime           @updatedAt @map("updated_at")
+model OrderTransaction {
+  id     String                 @id @default(uuid()) // This id will be the same of riot games transaction id
+  price  Float
+  status OrderTransactionStatus
 
-  @@map("orders_products")
+  order   Order                @relation(fields: [orderId], references: [id])
+  item    OrderTransactionItem @relation(fields: [itemId], references: [id])
+  account LeagueAccount        @relation(fields: [senderAccountId], references: [id])
+
+  orderId         String @map("order_id")
+  itemId          String @unique @map("item_id")
+  senderAccountId String @map("sender_account_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+enum Currency {
+  IP
+  RP
+}
+
+model OrderTransactionItem {
+  id               String            @id @default(uuid())
+  name             String
+  currency         Currency
+  price            Float
+  offerId          String            @map("offer_id")
+  inventoryType    String            @default("") @map("inventory_type")
+  subInventoryType String?           @default("") @map("sub_inventory_type")
+  transaction      OrderTransaction?
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
 }
