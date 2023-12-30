@@ -11,15 +11,14 @@ export class StoreItemCache {
 
   public async findAllItems(): Promise<StoreItemDomain[]> {
     const cachedItems = await this.cacheManager.get<string>(StoreItemCache.KEY);
-    if (!cachedItems) {
-      return null;
-    }
-
-    return JSON.parse(cachedItems);
+    return cachedItems ? JSON.parse(cachedItems) : null;
   }
 
   public async findOneItemByOfferId(offerId: string): Promise<any> {
-    return this.cacheManager.get(`${StoreItemCache.KEY}::${offerId}`);
+    const item = await this.cacheManager.get<string>(
+      `${StoreItemCache.KEY}::${offerId}`,
+    );
+    return item ? JSON.parse(item) : null;
   }
 
   public async saveAllItems(items: StoreItemDomain[]): Promise<void> {

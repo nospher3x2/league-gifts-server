@@ -69,7 +69,7 @@ export class StoreService {
   public async findAllStoreItemsByOfferId(
     offerIds: string[],
   ): Promise<StoreItemDomain[]> {
-    const catalog = await this.storeItemCache.findAllItems();
+    const catalog = await this.findAllStoreItems();
     const items: StoreItemDomain[] = [];
     for (const offerId of offerIds) {
       const cachedItem =
