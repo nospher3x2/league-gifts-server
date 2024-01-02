@@ -1,3 +1,4 @@
+import { Region } from '@ezreal';
 import { LeagueAccount } from '@prisma/client';
 import { LeagueAccountDomain } from 'src/accounts/entities/league.account.domain';
 
@@ -11,7 +12,7 @@ export class PrismaLeagueAccountsMapper {
       id: account.id,
       username: account.username,
       password: account.password,
-      region: account.region,
+      region: account.region as keyof typeof Region,
       rp: account.rp,
       ip: account.ip,
       type: account.type,

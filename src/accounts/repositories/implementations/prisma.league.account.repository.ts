@@ -52,6 +52,21 @@ export class PrismaLeagueAccountsRepository
     return PrismaLeagueAccountsMapper.toDomain(account);
   }
 
+  public async findOneWithNonExpiredPartnerTokenByRegion(
+    region: string,
+  ): Promise<LeagueAccountDomain> {
+    const account = await this.prisma.leagueAccount.findFirst({
+      where: {
+        region,
+        partnerTokenExpireAt: {
+          gt: new Date(),
+        },
+      },
+    });
+
+    return PrismaLeagueAccountsMapper.toDomain(account);
+  }
+
   public async findOneManagerWithNonExpiredSessionQueueTokenByRegion(
     region: string,
   ): Promise<LeagueAccountDomain> {

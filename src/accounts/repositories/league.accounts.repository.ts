@@ -15,6 +15,10 @@ export abstract class LeagueAccountsRepository {
     type: keyof typeof LeagueAccountType,
   ): Promise<LeagueAccountDomain | null>;
 
+  public abstract findOneWithNonExpiredPartnerTokenByRegion(
+    region: string,
+  ): Promise<LeagueAccountDomain | null>;
+
   public abstract findOneManagerWithNonExpiredSessionQueueTokenByRegion(
     region: string,
   ): Promise<LeagueAccountDomain | null>;
