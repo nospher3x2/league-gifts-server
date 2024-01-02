@@ -148,13 +148,19 @@ class Ezreal {
     gameName: string,
     tagLine: string,
   ): Promise<{ puuid: string }[]> {
-    return await Ezreal.ledge(session)
-      .get<{ puuid: string }[]>(`/aliases/v1/aliases`, {
-        params: {
-          gameName,
-          tagLine,
+    return await axios
+      .get<{ puuid: string }[]>(
+        `${EzrealConfig.RIOT_GAMES_ACCOUNT_API_URL}/aliases/v1/aliases`,
+        {
+          params: {
+            gameName,
+            tagLine,
+          },
+          headers: {
+            Authorization: `Bearer ${session.partnerToken}`,
+          },
         },
-      })
+      )
       .then((response) => response.data);
   }
 
