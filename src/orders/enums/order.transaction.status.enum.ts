@@ -1,4 +1,5 @@
 export const OrderTransactionStatus = Object.freeze({
+  PENDING: 'PENDING',
   ACCEPTED: 'ACCEPTED',
   FULFILLMENT_SUCCESSFUL: 'FULFILLMENT_SUCCESSFUL',
   FAILED: 'FAILED',

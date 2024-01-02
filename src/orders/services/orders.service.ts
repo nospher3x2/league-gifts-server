@@ -7,10 +7,7 @@ import { RecipientsService } from 'src/recipients/services/recipients.service';
 import { StoreService } from 'src/store/services/store.service';
 import { UserDomain } from 'src/users/domain/user.domain';
 import { UsersService } from 'src/users/services/users.service';
-import {
-  OrderDomain,
-  OrderWithTransactionsDomain,
-} from '../entities/order.domain';
+import { OrderDomain } from '../entities/order.domain';
 import Decimal from 'decimal.js';
 import { CreateOrderDto } from '../dtos/create.order.dto';
 import { StoreItemWithFlatPriceDomain } from 'src/store/entities/store.item.domain';
@@ -93,7 +90,7 @@ export class OrdersService {
       throw new BadRequestException('Not enough balance');
     }
 
-    const order = new OrderWithTransactionsDomain({
+    const order = new OrderDomain({
       status: 'PENDING',
       recipientId: recipient.id,
       userId: user.id,

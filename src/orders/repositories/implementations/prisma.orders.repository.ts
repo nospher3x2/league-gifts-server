@@ -3,11 +3,16 @@ import { OrdersRepository } from '../orders.repository';
 import { PrismaService } from '@common';
 import {
   OrderDomain,
-  OrderWithTransactionsDomain,
+  OrderWithRecipientAndTransactionsDomain,
 } from 'src/orders/entities/order.domain';
-import { StoreItemWithFlatPriceDomain } from 'src/store/entities/store.item.domain';
+import {
+  StoreItemDomain,
+  StoreItemWithFlatPriceDomain,
+} from 'src/store/entities/store.item.domain';
 import { randomUUID } from 'crypto';
 import { Prisma } from '@prisma/client';
+import { PrismaRecipientsMapper } from 'src/recipients/repositories/mappers/prisma.recipients.mapper';
+import { OrderTransactionWithItemDomain } from 'src/orders/entities/order.transaction.domain';
 
 @Injectable()
 export class PrismaOrdersRepository implements OrdersRepository {
@@ -34,9 +39,9 @@ export class PrismaOrdersRepository implements OrdersRepository {
   }
 
   public async createOneWithTransactions(
-    order: OrderWithTransactionsDomain,
+    order: OrderDomain,
     items: StoreItemWithFlatPriceDomain[],
-  ): Promise<OrderDomain> {
+  ): Promise<OrderWithRecipientAndTransactionsDomain> {
     const orderId = randomUUID();
     const createManyOrderTransactionPayload: Prisma.OrderTransactionCreateManyInput[] =
       [];
@@ -47,11 +52,12 @@ export class PrismaOrdersRepository implements OrdersRepository {
       const transactionItemId = randomUUID();
       createManyOrderTransactionItemPayload.push({
         id: transactionItemId,
+        name: item.name,
+        iconUrl: item.iconUrl,
+        currency: item.currency,
+        price: item.price,
         inventoryType: item.inventoryType,
         subInventoryType: item.subInventoryType,
-        price: item.price,
-        currency: item.currency,
-        name: item.name,
         offerId: item.offerId,
       });
 
@@ -64,7 +70,7 @@ export class PrismaOrdersRepository implements OrdersRepository {
       });
     }
 
-    const transactions = await this.prisma.$transaction([
+    const transaction = await this.prisma.$transaction([
       this.prisma.order.create({
         data: {
           id: orderId,
@@ -80,6 +86,9 @@ export class PrismaOrdersRepository implements OrdersRepository {
             },
           },
         },
+        include: {
+          recipient: true,
+        },
       }),
       this.prisma.orderTransactionItem.createMany({
         data: createManyOrderTransactionItemPayload,
@@ -87,8 +96,40 @@ export class PrismaOrdersRepository implements OrdersRepository {
       this.prisma.orderTransaction.createMany({
         data: createManyOrderTransactionPayload,
       }),
+      this.prisma.order.findUnique({
+        where: {
+          id: orderId,
+        },
+        include: {
+          recipient: true,
+          transactions: {
+            include: {
+              item: true,
+            },
+          },
+        },
+      }),
     ]);
 
-    return transactions[0];
+    const createdOrder = transaction[3];
+    return new OrderWithRecipientAndTransactionsDomain({
+      ...createdOrder,
+      recipient: PrismaRecipientsMapper.toDomain(createdOrder.recipient),
+      transactions: createdOrder.transactions.map(
+        (transaction) =>
+          new OrderTransactionWithItemDomain({
+            ...transaction,
+            item: new StoreItemDomain({
+              name: transaction.item.name,
+              iconUrl: transaction.item.iconUrl,
+              price: transaction.item.price,
+              currency: transaction.item.currency,
+              inventoryType: transaction.item.inventoryType,
+              subInventoryType: transaction.item.subInventoryType,
+              offerId: transaction.item.offerId,
+            }),
+          }),
+      ),
+    });
   }
 }

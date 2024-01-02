@@ -1,13 +1,19 @@
 import { RecipientDomain } from 'src/recipients/entities/recipient.domain';
 import { OrderStatus } from '../enums/order.status.enum';
-import { OrderTransactionDomain } from './order.transaction.domain';
+import { OrderTransactionWithItemDomain } from './order.transaction.domain';
+import { Exclude } from 'class-transformer';
 
 export class OrderDomain {
   public id: string;
   public status: keyof typeof OrderStatus;
+
+  @Exclude()
   public recipientId: string;
+  @Exclude()
   public userId: string;
+  @Exclude()
   public createdAt: Date;
+  @Exclude()
   public updatedAt: Date;
 
   constructor(partial: Partial<OrderDomain>) {
@@ -15,19 +21,11 @@ export class OrderDomain {
   }
 }
 
-export class OrderWithRecipientDomain extends OrderDomain {
+export class OrderWithRecipientAndTransactionsDomain extends OrderDomain {
   public recipient: RecipientDomain;
+  public transactions: OrderTransactionWithItemDomain[];
 
-  constructor(partial: Partial<OrderWithRecipientDomain>) {
-    super(partial);
-    Object.assign(this, partial);
-  }
-}
-
-export class OrderWithTransactionsDomain extends OrderDomain {
-  public transactions: OrderTransactionDomain[];
-
-  constructor(partial: Partial<OrderWithTransactionsDomain>) {
+  constructor(partial: Partial<OrderWithRecipientAndTransactionsDomain>) {
     super(partial);
     Object.assign(this, partial);
   }

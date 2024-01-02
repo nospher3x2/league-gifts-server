@@ -1,7 +1,7 @@
 import { StoreItemWithFlatPriceDomain } from 'src/store/entities/store.item.domain';
 import {
   OrderDomain,
-  OrderWithTransactionsDomain,
+  OrderWithRecipientAndTransactionsDomain,
 } from '../entities/order.domain';
 
 export abstract class OrdersRepository {
@@ -13,7 +13,7 @@ export abstract class OrdersRepository {
   ): Promise<OrderDomain | undefined>;
 
   public abstract createOneWithTransactions(
-    order: OrderWithTransactionsDomain,
+    order: OrderDomain,
     items: StoreItemWithFlatPriceDomain[],
-  ): Promise<OrderDomain>;
+  ): Promise<OrderWithRecipientAndTransactionsDomain>;
 }
