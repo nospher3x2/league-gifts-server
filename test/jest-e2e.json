@@ -15,6 +15,8 @@
   },
   "moduleNameMapper": {
     "@common/(.*)": "<rootDir>/../libs/common/src/$1",
-    "@common": "<rootDir>/../libs/common/src"
+    "@common": "<rootDir>/../libs/common/src",
+    "@ezreal/(.*)": "<rootDir>/../libs/ezreal/src/$1",
+    "@ezreal": "<rootDir>/../libs/ezreal/src"
   }
 }

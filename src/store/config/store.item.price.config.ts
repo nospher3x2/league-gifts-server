@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { StoreItemCurrency } from '../enums/store.item.currency.enum';
-import { LeagueAccountRegion } from 'src/accounts/enums/league.account.region.enum';
+import { Region } from '@ezreal';
 
 @Injectable()
 export class StoreItemPriceConfig {
@@ -9,7 +9,7 @@ export class StoreItemPriceConfig {
 
   public getCurrencyPriceByRegion(
     currency: keyof typeof StoreItemCurrency,
-    region: keyof typeof LeagueAccountRegion,
+    region: keyof typeof Region,
   ) {
     return this.configService.getOrThrow(`store.prices.${region}.${currency}`);
   }

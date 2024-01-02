@@ -2,9 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
-import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { ResponseTransformInterceptor } from '@common/interceptors/response-transform.interceptor';
+import { ResponseTransformInterceptor } from '@common';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);

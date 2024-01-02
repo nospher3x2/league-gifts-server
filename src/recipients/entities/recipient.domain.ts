@@ -1,12 +1,12 @@
 import { Exclude } from 'class-transformer';
 import { RecipientStatus } from '../enums/recipient.status.enum';
 import { randomUUID } from 'crypto';
-import { LeagueAccountRegion } from 'src/accounts/enums/league.account.region.enum';
+import { Region } from '@ezreal';
 
 export class RecipientDomain {
   public id: string;
   public name: string;
-  public region: keyof typeof LeagueAccountRegion;
+  public region: keyof typeof Region;
   public profileIconId: number;
   public requiredProfileIconId: number;
   @Exclude()

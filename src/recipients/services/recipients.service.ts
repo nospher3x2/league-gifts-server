@@ -14,6 +14,7 @@ import { RecipientStatus } from '../enums/recipient.status.enum';
 @Injectable()
 export class RecipientsService {
   private static readonly MAX_RECIPIENTS = 3;
+  private static readonly MAX_PUBLIC_PROFILE_ICONS = 26;
 
   constructor(
     private readonly accountsService: AccountsService,
@@ -61,37 +62,34 @@ export class RecipientsService {
     );
 
     const [gameName, tagLine] = createRecipientDto.name.split('#');
-    const aliases = await this.accountsService.getAliasesByGameNameAndTagLine(
-      manager,
+    const summonerPuuid = await manager.getSummonerPuuidByGameNameAndTagLine(
       gameName,
       tagLine,
     );
 
-    if (!aliases) {
+    if (!summonerPuuid) {
       throw new NotFoundException(
         `Summoner ${createRecipientDto.name} not found, please check if the name and tag is correct and try again.`,
       );
     }
 
-    const summoner = await this.accountsService.getSummonerByPuuid(
-      manager,
-      aliases.puuid,
-    );
-
+    const summoner = await manager.getSummonerByPuuid(summonerPuuid);
     if (!summoner) {
       throw new NotFoundException(
-        `Summoner ${createRecipientDto.name} not found, please check the region selected and try again.`,
+        `Summoner ${createRecipientDto.name} not found in ${createRecipientDto.region}, please check if the region is correct and try again.`,
       );
     }
 
-    const randomProfileIconId = Math.floor(Math.random() * 26) + 1;
+    const randomProfileIconId =
+      Math.floor(Math.random() * RecipientsService.MAX_PUBLIC_PROFILE_ICONS) +
+      1;
     const requiredProfileIconId =
       summoner.profileIconId === randomProfileIconId
         ? randomProfileIconId - 1
         : randomProfileIconId;
 
     const alreadyCreatedRecipient = await this.findOneByPuuidAndUserId(
-      aliases.puuid,
+      summonerPuuid,
       userId,
     );
 
@@ -115,7 +113,7 @@ export class RecipientsService {
       id: randomUUID(),
       name: createRecipientDto.name,
       region: createRecipientDto.region,
-      puuid: aliases.puuid,
+      puuid: summoner.puuid,
       profileIconId: summoner.profileIconId,
       requiredProfileIconId: requiredProfileIconId,
       status: RecipientStatus.PENDING,
@@ -142,11 +140,7 @@ export class RecipientsService {
       recipient.region,
     );
 
-    const summoner = await this.accountsService.getSummonerByPuuid(
-      manager,
-      recipient.puuid,
-    );
-
+    const summoner = await manager.getSummonerByPuuid(recipient.puuid);
     const requiredProfileIconIsSelected =
       summoner.profileIconId === recipient.requiredProfileIconId;
 

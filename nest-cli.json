@@ -15,6 +15,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/common/tsconfig.lib.json"
       }
+    },
+    "ezreal": {
+      "type": "library",
+      "root": "libs/ezreal",
+      "entryFile": "index",
+      "sourceRoot": "libs/ezreal/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/ezreal/tsconfig.lib.json"
+      }
     }
   }
 }

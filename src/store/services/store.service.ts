@@ -4,8 +4,9 @@ import { Decimal } from 'decimal.js';
 import { StoreItemDomain } from '../entities/store.item.domain';
 import { StoreItemPriceConfig } from '../config/store.item.price.config';
 import { AccountsService } from 'src/accounts/services/accounts.service';
-import { LeagueAccountRegion } from 'src/accounts/enums/league.account.region.enum';
 import { StoreItemCache } from '../cache/store.item.cache';
+import { Region } from '@ezreal';
+import { LeagueAccountDomain } from 'src/accounts/entities/league.account.domain';
 
 @Injectable()
 export class StoreService {
@@ -15,9 +16,9 @@ export class StoreService {
   > = {};
 
   constructor(
+    private readonly accountsService: AccountsService,
     private readonly storeItemPriceConfig: StoreItemPriceConfig,
     private readonly storeItemCache: StoreItemCache,
-    private readonly accountsService: AccountsService,
   ) {
     this.ITEMS_ICON_MAPPER = Object.freeze({
       BOOST: () => {
@@ -58,9 +59,11 @@ export class StoreService {
   public async findAllStoreItems(): Promise<StoreItemDomain[]> {
     const cachedItems = await this.storeItemCache.findAllItems();
     if (cachedItems) {
+      console.log('Using cached items');
       return cachedItems;
     }
 
+    console.log('Fetching items from store');
     const items = await this.getStoreItemsCatalog();
     await this.storeItemCache.saveAllItems(items);
     return items;
@@ -117,10 +120,14 @@ export class StoreService {
 
   public async getStoreItemsCatalog(): Promise<StoreItemDomain[]> {
     // Why? Because if we define a static region, maybe the region will be in maintenance
-    let account = null;
-    for (const region of Object.values(LeagueAccountRegion)) {
+    let account: LeagueAccountDomain = null;
+    for (const region of Object.values(Region)) {
       try {
-        account = await this.accountsService.findOneManagerAccount(region);
+        account = await this.accountsService.findOneManagerAccount(
+          region,
+          false,
+        );
+
         if (account) {
           break;
         }
@@ -138,7 +145,7 @@ export class StoreService {
 
     // TO-DO: Use i18n to get the item name in the user language
     const catalog: StoreItemDomain[] = [];
-    const offers = await this.accountsService.getAccountStoreCatalog(account);
+    const offers = await account.getStoreCatalog();
     for (const offer of offers) {
       if (!offer.active) {
         continue;
@@ -254,7 +261,7 @@ export class StoreService {
   public getFlatItemPriceByRegion(
     price: number,
     currency: keyof typeof StoreItemCurrency,
-    region: keyof typeof LeagueAccountRegion,
+    region: keyof typeof Region,
   ) {
     return Decimal.mul(
       price,

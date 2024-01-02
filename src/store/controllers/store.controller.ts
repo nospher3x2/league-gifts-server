@@ -14,7 +14,7 @@ import {
 } from '../entities/store.item.domain';
 import { StoreService } from '../services/store.service';
 import { plainToInstance } from 'class-transformer';
-import { LeagueAccountRegion } from 'src/accounts/enums/league.account.region.enum';
+import { Region } from '@ezreal';
 
 @Controller('store')
 @UseGuards(JwtAuthGuard)
@@ -23,8 +23,8 @@ export class StoreController {
 
   @Get('items')
   public async getItems(
-    @Query('region', new ParseEnumPipe(LeagueAccountRegion))
-    region: keyof typeof LeagueAccountRegion,
+    @Query('region', new ParseEnumPipe(Region))
+    region: keyof typeof Region,
   ): Promise<StoreItemWithFlatPriceDomain[]> {
     const items = await this.storeService.findAllStoreItems();
     return items.map((item) => {
@@ -43,8 +43,8 @@ export class StoreController {
   @Get('items/:offerId')
   public async getItemById(
     @Param('offerId') offerId: string,
-    @Query('region', new ParseEnumPipe(LeagueAccountRegion))
-    region: keyof typeof LeagueAccountRegion,
+    @Query('region', new ParseEnumPipe(Region))
+    region: keyof typeof Region,
   ): Promise<StoreItemWithFlatPriceDomain> {
     const item = plainToInstance(
       StoreItemDomain,

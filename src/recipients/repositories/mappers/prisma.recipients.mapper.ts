@@ -1,5 +1,5 @@
+import { Region } from '@ezreal';
 import { Recipient as RawRecipient } from '@prisma/client';
-import { LeagueAccountRegion } from 'src/accounts/enums/league.account.region.enum';
 import { RecipientDomain } from 'src/recipients/entities/recipient.domain';
 
 export class PrismaRecipientsMapper {
@@ -10,7 +10,7 @@ export class PrismaRecipientsMapper {
     return new RecipientDomain({
       id: raw.id,
       name: raw.name,
-      region: raw.region as keyof typeof LeagueAccountRegion,
+      region: raw.region as keyof typeof Region,
       profileIconId: raw.profileIconId,
       requiredProfileIconId: raw.requiredProfileIconId,
       puuid: raw.puuid,

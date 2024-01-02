@@ -1,6 +1,6 @@
 import { IsEnum, IsNotEmpty, IsString, ValidateIf } from 'class-validator';
 import { RecipientDomain } from '../entities/recipient.domain';
-import { LeagueAccountRegion } from 'src/accounts/enums/league.account.region.enum';
+import { Region } from '@ezreal';
 
 export class CreateRecipientDto
   implements Pick<RecipientDomain, 'name' | 'region'>
@@ -14,6 +14,6 @@ export class CreateRecipientDto
 
   @IsString()
   @IsNotEmpty()
-  @IsEnum(LeagueAccountRegion)
-  public region: keyof typeof LeagueAccountRegion;
+  @IsEnum(Region)
+  public region: keyof typeof Region;
 }
