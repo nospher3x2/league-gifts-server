@@ -183,11 +183,12 @@ enum Currency {
 model OrderTransactionItem {
   id               String            @id @default(uuid())
   name             String
+  iconUrl          String            @default("") @map("icon_url")
   currency         Currency
   price            Float
-  offerId          String            @map("offer_id")
   inventoryType    String            @map("inventory_type")
   subInventoryType String?           @default("") @map("sub_inventory_type")
+  offerId          String            @map("offer_id")
   transaction      OrderTransaction?
   createdAt        DateTime          @default(now()) @map("created_at")
   updatedAt        DateTime          @updatedAt @map("updated_at")
