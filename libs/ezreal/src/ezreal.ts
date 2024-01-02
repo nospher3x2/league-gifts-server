@@ -33,8 +33,6 @@ class Ezreal {
     session.sessionQueueToken = sessionQueueToken.token;
     session.sessionQueueTokenExpireAt = sessionQueueToken.expireAt;
 
-    console.log(sessionQueueToken);
-
     return session;
   }
 
@@ -101,7 +99,7 @@ class Ezreal {
       .then((response) => response.data);
 
     const sessionQueueTokenPayload = JSON.parse(
-      sessionQueueToken.split('.')[1],
+      Buffer.from(sessionQueueToken.split('.')[1], 'base64').toString(),
     );
 
     return {
