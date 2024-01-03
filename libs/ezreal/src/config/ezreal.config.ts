@@ -1,17 +1,14 @@
 import { Region } from '@ezreal/enums/region.enum';
 
 export class EzrealConfig {
-  public static readonly RIOT_AUTH_URL = 'https://auth.riotgames.com';
-  public static readonly HYDRA_AUTH_URL = 'https://api.hydranetwork.org';
-  public static readonly HYDRA_AUTH_KEY = process.env.HYDRA_AUTH_KEY;
+  public readonly RIOT_AUTH_URL = 'https://auth.riotgames.com';
+  public readonly HYDRA_AUTH_URL = 'https://api.hydranetwork.org';
+  public readonly HYDRA_AUTH_KEY = process.env.HYDRA_AUTH_KEY;
 
-  public static readonly RIOT_GAMES_ACCOUNT_API_URL =
+  public readonly RIOT_GAMES_ACCOUNT_API_URL =
     'https://api.account.riotgames.com';
 
-  public static readonly LEAGUE_EDGE_API_URL: Record<
-    keyof typeof Region,
-    string
-  > = {
+  public readonly LEAGUE_EDGE_API_URL: Record<keyof typeof Region, string> = {
     BR1: 'https://br-red.lol.sgp.pvp.net',
     EUN1: 'https://eune-red.lol.sgp.pvp.net',
     EUW1: 'https://euw-red.lol.sgp.pvp.net',
@@ -28,7 +25,7 @@ export class EzrealConfig {
     VN2: 'https://vn2-red.lol.sgp.pvp.net',
   };
 
-  public static readonly LEAGUE_LOGIN_QUEUE_API_URL: Record<
+  public readonly LEAGUE_LOGIN_QUEUE_API_URL: Record<
     keyof typeof Region,
     string
   > = {

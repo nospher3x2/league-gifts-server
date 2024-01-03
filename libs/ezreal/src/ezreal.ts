@@ -6,7 +6,10 @@ import { HydraAuthProvider } from './providers/implementations/hydra.auth.provid
 import { EzrealConfig } from './config/ezreal.config';
 
 class Ezreal {
-  private static authProvider: AuthProvider = new HydraAuthProvider();
+  private static config: EzrealConfig = new EzrealConfig();
+  private static authProvider: AuthProvider = new HydraAuthProvider(
+    Ezreal.config,
+  );
 
   public static async authenticate(
     username: string,
@@ -25,8 +28,6 @@ class Ezreal {
     session: AccountSession,
   ): Promise<AccountSession> {
     const userInfoToken = await this.getUserInfoToken(session);
-    console.log(userInfoToken);
-
     session.userInfoToken = userInfoToken;
 
     const sessionQueueToken = await this.getSessionQueueToken(session);
@@ -41,7 +42,7 @@ class Ezreal {
   ): Promise<string> {
     return axios
       .post<string>(
-        `${EzrealConfig.RIOT_AUTH_URL}/userinfo`,
+        `${Ezreal.config.RIOT_AUTH_URL}/userinfo`,
         {},
         {
           headers: {
@@ -61,7 +62,7 @@ class Ezreal {
     }
 
     const loginQueueUrl =
-      EzrealConfig.LEAGUE_LOGIN_QUEUE_API_URL[session.region];
+      Ezreal.config.LEAGUE_LOGIN_QUEUE_API_URL[session.region];
     const sessionAuthorization = await axios
       .post<{
         token: string;
@@ -150,7 +151,7 @@ class Ezreal {
   ): Promise<{ puuid: string }[]> {
     return await axios
       .get<{ puuid: string }[]>(
-        `${EzrealConfig.RIOT_GAMES_ACCOUNT_API_URL}/aliases/v1/aliases`,
+        `${Ezreal.config.RIOT_GAMES_ACCOUNT_API_URL}/aliases/v1/aliases`,
         {
           params: {
             gameName,
@@ -166,7 +167,7 @@ class Ezreal {
 
   private static ledge(session: AccountSession) {
     const api = axios.create({
-      baseURL: EzrealConfig.LEAGUE_EDGE_API_URL[session.region],
+      baseURL: Ezreal.config[session.region],
     });
 
     api.interceptors.request.use((config) => {

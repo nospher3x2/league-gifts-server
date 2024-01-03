@@ -34,16 +34,17 @@ interface HydraAuthErrorResponse extends HydraAuthResponse {
 }
 
 export class HydraAuthProvider implements AuthProvider {
+  constructor(private readonly config: EzrealConfig) {}
   public async handle(
     username: string,
     password: string,
     clientId: string = 'lol',
   ): Promise<AccountSession> {
     const data = await axios
-      .post<HydraAuthSuccessResponse>(EzrealConfig.HYDRA_AUTH_URL, {
+      .post<HydraAuthSuccessResponse>(this.config.HYDRA_AUTH_URL, {
         login: username,
         pass: password,
-        hnkey: EzrealConfig.HYDRA_AUTH_KEY,
+        hnkey: this.config.HYDRA_AUTH_KEY,
         client_id: clientId,
       })
       .then((response) => response.data)
