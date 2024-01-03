@@ -138,6 +138,7 @@ enum OrderStatus {
 
 model Order {
   id           String             @id @default(uuid())
+  price        Float              @map("price")
   transactions OrderTransaction[]
   status       OrderStatus        @default(PENDING)
   recipient    Recipient          @relation(fields: [recipientId], references: [id])

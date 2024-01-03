@@ -1,10 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src",
+  "sourceRoot": "apps/backend/src",
   "compilerOptions": {
     "deleteOutDir": true,
-    "webpack": true
+    "webpack": true,
+    "tsConfigPath": "apps/backend/tsconfig.app.json"
   },
   "projects": {
     "common": {
@@ -24,6 +25,26 @@
       "compilerOptions": {
         "tsConfigPath": "libs/ezreal/tsconfig.lib.json"
       }
+    },
+    "backend": {
+      "type": "application",
+      "root": "apps/backend",
+      "entryFile": "main",
+      "sourceRoot": "apps/backend/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/backend/tsconfig.app.json"
+      }
+    },
+    "gift-sender": {
+      "type": "application",
+      "root": "apps/gift-sender",
+      "entryFile": "main",
+      "sourceRoot": "apps/gift-sender/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/gift-sender/tsconfig.app.json"
+      }
     }
-  }
+  },
+  "monorepo": true,
+  "root": "apps/backend"
 }
