@@ -1,6 +1,6 @@
+import { RecipientDomain } from '@common/recipients';
 import { Region } from '@ezreal';
 import { Recipient as RawRecipient } from '@prisma/client';
-import { RecipientDomain } from '../../entities/recipient.domain';
 
 export class PrismaRecipientsMapper {
   public static toDomain(raw: RawRecipient): RecipientDomain {

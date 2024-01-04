@@ -8,13 +8,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { RecipientsService } from '../services/recipients.service';
-import { RecipientDomain } from '../entities/recipient.domain';
 import { plainToInstance } from 'class-transformer';
 import { CreateRecipientDto } from '../dtos/create.recipient.dto';
 import { CustomResponse } from '@common';
 import { JwtAuthGuard } from '../../auth/guards/jwt.guard';
 import { User } from '../../users/decorators/user.decorator';
-import { UserDomain } from '../../users/domain/user.domain';
+import { RecipientDomain } from '@common/recipients';
+import { UserDomain } from '@common/users';
 
 @Controller('recipients')
 @UseGuards(JwtAuthGuard)

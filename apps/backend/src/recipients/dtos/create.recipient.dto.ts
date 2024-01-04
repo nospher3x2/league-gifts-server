@@ -1,6 +1,6 @@
 import { IsEnum, IsNotEmpty, IsString, ValidateIf } from 'class-validator';
-import { RecipientDomain } from '../entities/recipient.domain';
 import { Region } from '@ezreal';
+import { RecipientDomain } from '@common/recipients';
 
 export class CreateRecipientDto
   implements Pick<RecipientDomain, 'name' | 'region'>

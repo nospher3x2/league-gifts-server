@@ -1,4 +1,4 @@
-import { RecipientDomain } from '../entities/recipient.domain';
+import { RecipientDomain } from '@common/recipients';
 
 export abstract class RecipientsRepository {
   public abstract findAllByUserId(userId: string): Promise<RecipientDomain[]>;

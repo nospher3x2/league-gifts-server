@@ -5,11 +5,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { RecipientsRepository } from '../repositories/recipients.repository';
-import { RecipientDomain } from '../entities/recipient.domain';
 import { CreateRecipientDto } from '../dtos/create.recipient.dto';
 import { randomUUID } from 'crypto';
-import { RecipientStatus } from '../enums/recipient.status.enum';
 import { AccountsService } from '../../accounts/services/accounts.service';
+import { RecipientDomain, RecipientStatus } from '@common/recipients';
 
 @Injectable()
 export class RecipientsService {
@@ -140,7 +139,10 @@ export class RecipientsService {
       recipient.region,
     );
 
+    console.log('abc');
     const summoner = await manager.getSummonerByPuuid(recipient.puuid);
+
+    console.log(summoner);
     const requiredProfileIconIsSelected =
       summoner.profileIconId === recipient.requiredProfileIconId;
 

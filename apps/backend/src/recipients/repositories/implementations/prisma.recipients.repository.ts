@@ -3,7 +3,7 @@ import { RecipientsRepository } from '../recipients.repository';
 import { PrismaService } from '@common';
 import { PrismaRecipientsMapper } from '../mappers/prisma.recipients.mapper';
 import { randomUUID } from 'crypto';
-import { RecipientDomain } from '../../entities/recipient.domain';
+import { RecipientDomain } from '@common/recipients';
 
 @Injectable()
 export class PrismaRecipientsRepository implements RecipientsRepository {
