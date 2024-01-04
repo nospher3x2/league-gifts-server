@@ -7,14 +7,11 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import {
-  StoreItemDomain,
-  StoreItemWithFlatPriceDomain,
-} from '../entities/store.item.domain';
 import { StoreService } from '../services/store.service';
 import { plainToInstance } from 'class-transformer';
 import { Region } from '@ezreal';
 import { JwtAuthGuard } from '../../auth/guards/jwt.guard';
+import { StoreItemWithFlatPriceDomain, StoreItemDomain } from '@common/store';
 
 @Controller('store')
 @UseGuards(JwtAuthGuard)

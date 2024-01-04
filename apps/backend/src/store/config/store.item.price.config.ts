@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { StoreItemCurrency } from '../enums/store.item.currency.enum';
 import { Region } from '@ezreal';
+import { StoreItemCurrency } from '@common/store';
 
 @Injectable()
 export class StoreItemPriceConfig {
