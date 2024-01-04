@@ -1,6 +1,6 @@
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
-import { UserDomain } from '../domain/user.domain';
 import { PasswordDto } from '@common/password/password.dto';
+import { UserDomain } from '@common/users';
 
 export class CreateUserDto
   extends PasswordDto

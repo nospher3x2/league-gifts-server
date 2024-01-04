@@ -1,10 +1,10 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
-import { UserDomain } from '../domain/user.domain';
 import { UsersService } from '../services/users.service';
 import { User } from '../decorators/user.decorator';
 import { plainToInstance } from 'class-transformer';
 import { CustomResponse } from '@common';
 import { JwtAuthGuard } from '../../auth/guards/jwt.guard';
+import { UserDomain } from '@common/users';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)

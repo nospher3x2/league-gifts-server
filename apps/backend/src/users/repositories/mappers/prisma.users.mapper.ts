@@ -1,5 +1,5 @@
+import { UserDomain } from '@common/users';
 import { User } from '@prisma/client';
-import { UserDomain } from '../../domain/user.domain';
 
 export class PrismaUsersMapper {
   public static toDomain(user: User): UserDomain {

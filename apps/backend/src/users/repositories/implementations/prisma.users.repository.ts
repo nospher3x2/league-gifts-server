@@ -4,8 +4,8 @@ import { Prisma, UserRole, UserStatus } from '@prisma/client';
 import { UsersRepository } from '../users.repository';
 import { PrismaUsersMapper } from '../mappers/prisma.users.mapper';
 import { randomUUID } from 'crypto';
-import { UserDomain } from '../../domain/user.domain';
 import { CreateUserDto } from '../../dtos/create.user.dto';
+import { UserDomain } from '@common/users';
 
 @Injectable()
 export class PrismaUsersRepository implements UsersRepository {

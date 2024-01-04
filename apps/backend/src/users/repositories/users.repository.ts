@@ -1,4 +1,4 @@
-import { UserDomain } from '../domain/user.domain';
+import { UserDomain } from '@common/users';
 import { CreateUserDto } from '../dtos/create.user.dto';
 
 export abstract class UsersRepository {

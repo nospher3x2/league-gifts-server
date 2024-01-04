@@ -3,8 +3,8 @@ import {
   Injectable,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { UserDomain } from '@common/users';
 import { PasswordService } from '@common/password';
-import { UserDomain } from '../domain/user.domain';
 import { CreateUserDto } from '../dtos/create.user.dto';
 import { UsersRepository } from '../repositories/users.repository';
 
