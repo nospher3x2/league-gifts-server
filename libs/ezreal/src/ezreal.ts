@@ -4,6 +4,7 @@ import { Summoner } from './interfaces/summoner.interface';
 import { AuthProvider } from './providers/auth.provider';
 import { HydraAuthProvider } from './providers/implementations/hydra.auth.provider';
 import { EzrealConfig } from './config/ezreal.config';
+import { CapOrder } from './interfaces/cap.order.interface';
 
 class Ezreal {
   private static config: EzrealConfig = new EzrealConfig();
@@ -165,15 +166,77 @@ class Ezreal {
       .then((response) => response.data);
   }
 
+  public static async createCapOrder(
+    session: AccountSession,
+    offerId: string,
+    paymentOption: 'RP' | 'IP',
+    purchaserName: string,
+    recipientId: string,
+    recipientName: string,
+    giftMessage: string,
+    orderId: string,
+  ): Promise<CapOrder> {
+    return Ezreal.ledge(session)
+      .post<{ data: CapOrder }>(
+        `/services/cap/orders/orders-api/v2/products/d1c2664a-5938-4c41-8d1b-61fd51052c22/orders`,
+        {
+          data: {
+            id: '',
+            purchaser: {
+              id: session.id,
+            },
+            location: location,
+            subOrders: [
+              {
+                offer: {
+                  id: offerId,
+                  productId: 'd1c2664a-5938-4c41-8d1b-61fd51052c22',
+                },
+                offerContext: {
+                  paymentOption: paymentOption,
+                  quantity: 1,
+                  purchaserName: purchaserName,
+                  recipientName: recipientName,
+                  giftMessage: giftMessage,
+                },
+                recipientId: recipientId,
+              },
+            ],
+          },
+          meta: {
+            correlationId: '',
+            jwt: '',
+            xid: orderId,
+          },
+        },
+      )
+      .then((response) => response.data.data);
+  }
+
+  public async getCapOrderByOrderId(
+    session: AccountSession,
+    orderId: string,
+  ): Promise<CapOrder> {
+    return Ezreal.ledge(session)
+      .get<CapOrder>(`/storefront/v2/getCapOrder`, {
+        params: {
+          orderId: orderId,
+        },
+      })
+      .then((response) => response.data);
+  }
+
   private static ledge(session: AccountSession) {
     const api = axios.create({
-      baseURL: Ezreal.config[session.region],
+      baseURL: Ezreal.config.LEAGUE_EDGE_API_URL[session.region],
     });
 
     api.interceptors.request.use((config) => {
-      const token = config.url.includes('storefront/')
-        ? session.partnerToken
-        : session.sessionQueueToken;
+      const token =
+        config.url.includes('storefront/') ||
+        config.url.includes('cap/orders/orders-api')
+          ? session.partnerToken
+          : session.sessionQueueToken;
 
       config.headers.Authorization = `Bearer ${token}`;
       return config;
