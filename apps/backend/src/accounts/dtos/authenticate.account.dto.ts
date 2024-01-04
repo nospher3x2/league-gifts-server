@@ -1,5 +1,5 @@
+import { LeagueAccountType } from '@common/accounts';
 import { IsNotEmpty, IsString } from 'class-validator';
-import { LeagueAccountType } from '../enums/league.account.type.enum';
 
 export class AuthenticateAccountDto {
   @IsString()

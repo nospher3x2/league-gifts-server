@@ -1,8 +1,12 @@
-import { LeagueAccountDomain } from '../entities/league.account.domain';
-import { LeagueAccountType } from '../enums/league.account.type.enum';
+import { LeagueAccountDomain, LeagueAccountType } from '@common/accounts';
 
 export abstract class LeagueAccountsRepository {
   public abstract findAll(): Promise<LeagueAccountDomain[]>;
+
+  public abstract findAllGiftAccountsWithMinimumRpByRegion(
+    region: string,
+    minimumRp: number,
+  ): Promise<LeagueAccountDomain[]>;
 
   public abstract findOneById(id: string): Promise<LeagueAccountDomain | null>;
 

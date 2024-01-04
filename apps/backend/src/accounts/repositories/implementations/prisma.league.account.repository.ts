@@ -1,9 +1,8 @@
 import { PrismaService } from '@common';
 import { Injectable } from '@nestjs/common';
+import { LeagueAccountDomain, LeagueAccountType } from '@common/accounts';
 import { LeagueAccountsRepository } from '../league.accounts.repository';
 import { PrismaLeagueAccountsMapper } from '../mappers/prisma.league.accounts.mapper';
-import { LeagueAccountDomain } from '../../entities/league.account.domain';
-import { LeagueAccountType } from '../../enums/league.account.type.enum';
 
 @Injectable()
 export class PrismaLeagueAccountsRepository
@@ -14,6 +13,46 @@ export class PrismaLeagueAccountsRepository
   public async findAll(): Promise<LeagueAccountDomain[]> {
     const accounts = await this.prisma.leagueAccount.findMany();
     return accounts.map(PrismaLeagueAccountsMapper.toDomain);
+  }
+
+  public async findAllGiftAccountsWithMinimumRpByRegion(
+    region: string,
+    minimumRp: number,
+  ): Promise<LeagueAccountDomain[]> {
+    const accounts = await this.prisma.leagueAccount.findMany({
+      where: {
+        region,
+        rp: {
+          gte: minimumRp,
+        },
+        type: 'GIFT',
+      },
+      include: {
+        orders: {
+          where: {
+            status: 'PENDING',
+          },
+          include: {
+            item: true,
+          },
+        },
+      },
+    });
+
+    return accounts
+      .filter((account) => {
+        const ordersLength = account.orders.length;
+        if (ordersLength <= 1) {
+          if (ordersLength === 0) return true;
+          return account.rp - account.orders[0].item.price >= minimumRp;
+        }
+
+        const totalRp = account.orders.reduce((acc, order) => {
+          return acc + order.item.price;
+        }, 0);
+        return account.rp - totalRp >= minimumRp;
+      })
+      .map(PrismaLeagueAccountsMapper.toDomain);
   }
 
   public async findOneById(id: string): Promise<LeagueAccountDomain> {

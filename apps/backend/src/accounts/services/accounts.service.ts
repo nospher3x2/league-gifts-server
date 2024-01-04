@@ -3,26 +3,31 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { LeagueAccountDomain } from '../entities/league.account.domain';
-import { HttpService } from '@nestjs/axios';
 import { LeagueAccountsRepository } from '../repositories/league.accounts.repository';
-import { LeagueAccountType } from '../enums/league.account.type.enum';
 import {
   AuthException,
   AuthUnknownErrorException,
   Ezreal,
   Region,
 } from '@ezreal';
+import { LeagueAccountDomain, LeagueAccountType } from '@common/accounts';
 
 @Injectable()
 export class AccountsService {
-  constructor(
-    private readonly httpService: HttpService,
-    private readonly accountsRepository: LeagueAccountsRepository,
-  ) {}
+  constructor(private readonly accountsRepository: LeagueAccountsRepository) {}
 
   public async findAll(): Promise<LeagueAccountDomain[]> {
     return this.accountsRepository.findAll();
+  }
+
+  public async findAllGiftAccountsWithMinimumRpByRegion(
+    region: keyof typeof Region,
+    minimumRp: number,
+  ): Promise<LeagueAccountDomain[]> {
+    return this.accountsRepository.findAllGiftAccountsWithMinimumRpByRegion(
+      region,
+      minimumRp,
+    );
   }
 
   public async findOneManagerAccount(
