@@ -3,8 +3,8 @@ import { AuthService } from '../services/auth.service';
 import { LocalAuthGuard } from '../guards/local.guard';
 import { plainToInstance } from 'class-transformer';
 import { CustomResponse } from '@common';
+import { UserDomain } from '@common/users';
 import { User } from '../../users/decorators/user.decorator';
-import { UserDomain } from '../../users/domain/user.domain';
 import { CreateUserDto } from '../../users/dtos/create.user.dto';
 
 @Controller('auth')

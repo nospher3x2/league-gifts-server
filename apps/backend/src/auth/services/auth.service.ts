@@ -2,9 +2,9 @@ import { PasswordService } from '@common';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthConfigService } from '../config/auth.config.service';
-import { UserDomain } from '../../users/domain/user.domain';
 import { CreateUserDto } from '../../users/dtos/create.user.dto';
 import { UsersService } from '../../users/services/users.service';
+import { UserDomain } from '@common/users';
 
 @Injectable()
 export class AuthService {
