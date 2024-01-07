@@ -123,26 +123,13 @@ export class RecipientsService {
   }
 
   public async updateOneIfChangedProfileIconToRequired(
-    recipientId: string,
-    userId: string,
+    recipient: RecipientDomain,
   ): Promise<RecipientDomain> {
-    const recipient = await this.findOneByIdAndUserId(recipientId, userId);
-    if (!recipient) {
-      throw new NotFoundException('Recipient not found');
-    }
-
-    if (recipient.isVerified()) {
-      throw new ConflictException('Recipient is already verified');
-    }
-
     const manager = await this.accountsService.findOneManagerAccount(
       recipient.region,
     );
 
-    console.log('abc');
     const summoner = await manager.getSummonerByPuuid(recipient.puuid);
-
-    console.log(summoner);
     const requiredProfileIconIsSelected =
       summoner.profileIconId === recipient.requiredProfileIconId;
 
@@ -156,12 +143,7 @@ export class RecipientsService {
     return this.recipientsRepository.saveOne(recipient);
   }
 
-  public async deleteOne(recipientId: string, userId: string): Promise<void> {
-    const recipient = await this.findOneByIdAndUserId(recipientId, userId);
-    if (!recipient) {
-      throw new NotFoundException('Recipient not found');
-    }
-
+  public async deleteOne(recipient: RecipientDomain): Promise<void> {
     if (recipient.isRemoved()) {
       throw new ConflictException('Recipient is already removed');
     }
@@ -172,6 +154,9 @@ export class RecipientsService {
       return;
     }
 
-    await this.recipientsRepository.deleteOneByIdAndUserId(recipientId, userId);
+    await this.recipientsRepository.deleteOneByIdAndUserId(
+      recipient.id,
+      recipient.userId,
+    );
   }
 }

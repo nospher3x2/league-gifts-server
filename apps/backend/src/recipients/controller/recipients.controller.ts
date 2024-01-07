@@ -15,6 +15,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt.guard';
 import { User } from '../../users/decorators/user.decorator';
 import { RecipientDomain } from '@common/recipients';
 import { UserDomain } from '@common/users';
+import { RecipientExistsPipe } from '../pipes/recipient.exists.pipe';
 
 @Controller('recipients')
 @UseGuards(JwtAuthGuard)
@@ -33,33 +34,21 @@ export class RecipientsController {
 
   @Get(':id')
   public async findOneByIdAndUserId(
-    @Param('id') id: string,
-    @User() user: UserDomain,
+    @Param('id', RecipientExistsPipe()) recipient: RecipientDomain,
   ): Promise<RecipientDomain | null> {
-    const recipient = await this.recipientsService.findOneByIdAndUserId(
-      id,
-      user.id,
-    );
-
-    if (!recipient) {
-      return null;
-    }
-
     return plainToInstance(RecipientDomain, recipient);
   }
 
   @Get(':id/verify')
   public async verifyOneByIdAndUserId(
-    @Param('id') id: string,
-    @User() user: UserDomain,
+    @Param('id', RecipientExistsPipe('PENDING')) recipient: RecipientDomain,
   ): Promise<RecipientDomain> {
-    const recipient =
+    return plainToInstance(
+      RecipientDomain,
       await this.recipientsService.updateOneIfChangedProfileIconToRequired(
-        id,
-        user.id,
-      );
-
-    return plainToInstance(RecipientDomain, recipient);
+        recipient,
+      ),
+    );
   }
 
   @Post()
@@ -77,10 +66,9 @@ export class RecipientsController {
 
   @Delete(':id')
   public async deleteOne(
-    @Param('id') id: string,
-    @User() user: UserDomain,
+    @Param('id', RecipientExistsPipe()) recipient: RecipientDomain,
   ): Promise<CustomResponse<void>> {
-    await this.recipientsService.deleteOne(id, user.id);
+    await this.recipientsService.deleteOne(recipient);
     return {
       message: 'Recipient deleted successfully',
       data: null,
