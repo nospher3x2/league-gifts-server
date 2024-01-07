@@ -2,6 +2,7 @@ import { Exclude } from 'class-transformer';
 import { Ezreal, AccountSession, Region } from '@ezreal';
 import { Summoner } from '@ezreal/interfaces/summoner.interface';
 import { LeagueAccountType } from './league.account.type.enum';
+import { Nameset } from '@ezreal/interfaces/nameset.interface';
 
 export class LeagueAccountDomain implements AccountSession {
   public id: string;
@@ -9,6 +10,7 @@ export class LeagueAccountDomain implements AccountSession {
   public username: string;
   @Exclude()
   public password: string;
+  public name: string;
   public rp: number;
   public ip: number;
   public type: keyof typeof LeagueAccountType;
@@ -58,8 +60,11 @@ export class LeagueAccountDomain implements AccountSession {
 
   public async getSummonerByPuuid(puuid: string): Promise<Summoner> {
     const summoner = await Ezreal.getSummonersByPuuids(this, [puuid]);
-    console.log(summoner);
+    return summoner.length > 0 ? summoner[0] : null;
+  }
 
+  public async getSummonerNamesetByPuuid(puuid: string): Promise<Nameset> {
+    const summoner = await Ezreal.getNamesetByPuuids(this, [puuid]);
     return summoner.length > 0 ? summoner[0] : null;
   }
 

@@ -5,6 +5,7 @@ import { AuthProvider } from './providers/auth.provider';
 import { HydraAuthProvider } from './providers/implementations/hydra.auth.provider';
 import { EzrealConfig } from './config/ezreal.config';
 import { CapOrder } from './interfaces/cap.order.interface';
+import { Nameset } from './interfaces/nameset.interface';
 
 class Ezreal {
   private static config: EzrealConfig = new EzrealConfig();
@@ -145,13 +146,32 @@ class Ezreal {
       .then((response) => response.data);
   }
 
+  public static async getNamesetByPuuids(
+    session: AccountSession,
+    puuids: string[],
+  ): Promise<Nameset[]> {
+    return await axios
+      .post<Nameset[]>(
+        `${Ezreal.config.RIOT_GAMES_ACCOUNT_API_URL}/namesets/v1/namesets`,
+        {
+          puuids: puuids,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${session.partnerToken}`,
+          },
+        },
+      )
+      .then((response) => response.data);
+  }
+
   public static async getAliasesByGameNameAndTagLine(
     session: AccountSession,
     gameName: string,
     tagLine: string,
-  ): Promise<{ puuid: string }[]> {
+  ): Promise<Nameset[]> {
     return await axios
-      .get<{ puuid: string }[]>(
+      .get<Nameset[]>(
         `${Ezreal.config.RIOT_GAMES_ACCOUNT_API_URL}/aliases/v1/aliases`,
         {
           params: {
@@ -213,7 +233,7 @@ class Ezreal {
       .then((response) => response.data.data);
   }
 
-  public async getCapOrderByOrderId(
+  public static async getCapOrderByOrderId(
     session: AccountSession,
     orderId: string,
   ): Promise<CapOrder> {
