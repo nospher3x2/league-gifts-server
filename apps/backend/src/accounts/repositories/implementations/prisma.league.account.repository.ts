@@ -130,8 +130,9 @@ export class PrismaLeagueAccountsRepository
         id: leagueAccountDomain.id,
       },
       update: {
-        password: leagueAccountDomain.password,
         region: leagueAccountDomain.region,
+        password: leagueAccountDomain.password,
+        name: leagueAccountDomain.name,
         ip: leagueAccountDomain.ip,
         rp: leagueAccountDomain.rp,
         type: leagueAccountDomain.type,
@@ -144,9 +145,10 @@ export class PrismaLeagueAccountsRepository
       },
       create: {
         id: leagueAccountDomain.id,
+        region: leagueAccountDomain.region,
         username: leagueAccountDomain.username,
         password: leagueAccountDomain.password,
-        region: leagueAccountDomain.region,
+        name: leagueAccountDomain.name,
         ip: leagueAccountDomain.ip,
         rp: leagueAccountDomain.rp,
         type: leagueAccountDomain.type,

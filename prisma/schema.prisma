@@ -113,8 +113,9 @@ enum LeagueAccountType {
 model LeagueAccount {
   id                        String             @id @default(uuid())
   region                    String
-  username                  String
+  username                  String             @unique
   password                  String
+  name                      String             @default("")
   rp                        Int
   ip                        Int
   partnerToken              String             @map("partner_token") @db.Text()

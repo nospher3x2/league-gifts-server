@@ -10,9 +10,10 @@ export class PrismaLeagueAccountsMapper {
 
     return new LeagueAccountDomain({
       id: account.id,
+      region: account.region as keyof typeof Region,
       username: account.username,
       password: account.password,
-      region: account.region as keyof typeof Region,
+      name: account.name,
       rp: account.rp,
       ip: account.ip,
       type: account.type,

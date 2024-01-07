@@ -80,7 +80,6 @@ export class AccountsService {
           !authenticateOnLedge ||
           !storedAccount.sessionQueueTokenIsExpired()
         ) {
-          console.log(1);
           return storedAccount;
         }
 
@@ -94,8 +93,6 @@ export class AccountsService {
         password,
         authenticateOnLedge,
       );
-
-      console.log(session);
 
       const account = new LeagueAccountDomain({
         id: session.id,
@@ -119,6 +116,9 @@ export class AccountsService {
         const wallet = await account.getWallet();
         account.ip = wallet.ip;
         account.rp = wallet.rp;
+
+        const nameset = await account.getSummonerNamesetByPuuid(session.id);
+        account.name = `${nameset.alias.game_name}#${nameset.alias.tag_line}`;
       }
 
       return this.accountsRepository.upsertOne(account);
