@@ -3,6 +3,7 @@ import {
   Get,
   Param,
   ParseEnumPipe,
+  ParseUUIDPipe,
   Post,
   Query,
   UseGuards,
@@ -39,7 +40,8 @@ export class StoreController {
 
   @Get('items/:offerId')
   public async getItemById(
-    @Param('offerId') offerId: string,
+    @Param('offerId', new ParseUUIDPipe())
+    offerId: string,
     @Query('region', new ParseEnumPipe(Region))
     region: keyof typeof Region,
   ): Promise<StoreItemWithFlatPriceDomain> {

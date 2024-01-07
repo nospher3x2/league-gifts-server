@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { Decimal } from 'decimal.js';
 import { StoreItemPriceConfig } from '../config/store.item.price.config';
 import { StoreItemCache } from '../cache/store.item.cache';
@@ -8,61 +12,49 @@ import { LeagueAccountDomain } from '@common/accounts';
 import { StoreItemDomain, StoreItemCurrency } from '@common/store';
 
 @Injectable()
-export class StoreService {
-  private readonly ITEMS_ICON_MAPPER: Record<
-    string,
-    (item: StoreItemDomain) => string
-  > = {};
+export class StoreService implements OnModuleInit {
+  private itemsIconMapper: Record<string, (item: StoreItemDomain) => string> =
+    {};
 
   constructor(
     private readonly accountsService: AccountsService,
     private readonly storeItemPriceConfig: StoreItemPriceConfig,
     private readonly storeItemCache: StoreItemCache,
-  ) {
-    this.ITEMS_ICON_MAPPER = Object.freeze({
-      BOOST: () => {
-        return 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-store/global/default/storefront/addon/public/img/composites/xp_boost.png';
-      },
-      CHAMPION: (item: StoreItemDomain) => {
-        return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-tiles/${item.itemId}/${item.itemId}000.jpg`;
-      },
-      CHAMPION_SKIN: (item: StoreItemDomain) => {
-        const championId = String(item.itemId).slice(0, -3);
-        if (item.subInventoryType === 'RECOLOR') {
-          return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/${championId}/${item.itemId}.png`;
-        }
+  ) {}
 
-        return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-tiles/${championId}/${item.itemId}.jpg`;
-      },
-      SUMMONER_ICON: (item: StoreItemDomain) => {
-        return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${item.itemId}.jpg`;
-      },
-      WARD_SKIN: (item: StoreItemDomain) => {
-        return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/content/src/leagueclient/wardskinimages/wardhero_${item.itemId}.png`;
-      },
-      // EMOTE: (item: any) => {
-      //   // const icon = EMOTES.find(
-      //   //   (emote: any) => emote.id === item.itemId,
-      //   // ).inventoryIcon.split('/SummonerEmotes/')[1];
-      //   // return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/loadouts/summoneremotes/${icon.toLowerCase()}`;
-      // },
-      // TFT_MAP_SKIN: (item: any) => {
-      //   // const icon = TFT_MAP_SKINS.find(
-      //   //   (map: any) => map.itemId === item.itemId,
-      //   // ).loadoutsIcon.split('/TFTMapSkins/')[1];
-      //   // return `https://raw.communitydragon.org/latest/game/assets/loadouts/tftmapskins/${icon.toLowerCase()}`;
-      // },
-    });
+  public onModuleInit() {
+    this.itemsIconMapper['BOOST'] = () => {
+      return 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-store/global/default/storefront/addon/public/img/composites/xp_boost.png';
+    };
+
+    this.itemsIconMapper['CHAMPION'] = (item: StoreItemDomain) => {
+      return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-tiles/${item.itemId}/${item.itemId}000.jpg`;
+    };
+
+    this.itemsIconMapper['CHAMPION_SKIN'] = (item: StoreItemDomain) => {
+      const championId = String(item.itemId).slice(0, -3);
+      if (item.subInventoryType === 'RECOLOR') {
+        return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/${championId}/${item.itemId}.png`;
+      }
+
+      return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-tiles/${championId}/${item.itemId}.jpg`;
+    };
+
+    this.itemsIconMapper['SUMMONER_ICON'] = (item: StoreItemDomain) => {
+      return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${item.itemId}.jpg`;
+    };
+
+    this.itemsIconMapper['WARD_SKIN'] = (item: StoreItemDomain) => {
+      return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/content/src/leagueclient/wardskinimages/wardhero_${item.itemId}.png`;
+    };
   }
 
   public async findAllStoreItems(): Promise<StoreItemDomain[]> {
     const cachedItems = await this.storeItemCache.findAllItems();
     if (cachedItems) {
-      console.log('Using cached items');
       return cachedItems;
     }
 
-    console.log('Fetching items from store');
     const items = await this.getStoreItemsCatalog();
     await this.storeItemCache.saveAllItems(items);
     return items;
@@ -176,7 +168,7 @@ export class StoreService {
       }
 
       const iconUrl = this.getItemIconUrl(offer);
-      if (!iconUrl.startsWith('http')) {
+      if (!iconUrl || !iconUrl.startsWith('http')) {
         continue;
       }
 
@@ -212,8 +204,8 @@ export class StoreService {
       return `https:${item.iconUrl}`;
     }
 
-    if (this.ITEMS_ICON_MAPPER[item.inventoryType]) {
-      return this.ITEMS_ICON_MAPPER[item.inventoryType](item);
+    if (this.itemsIconMapper[item.inventoryType]) {
+      return this.itemsIconMapper[item.inventoryType](item);
     }
 
     return item.iconUrl;
