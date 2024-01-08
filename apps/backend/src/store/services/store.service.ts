@@ -9,7 +9,11 @@ import { StoreItemCache } from '../cache/store.item.cache';
 import { Region } from '@ezreal';
 import { AccountsService } from '../../accounts/services/accounts.service';
 import { LeagueAccountDomain } from '@common/accounts';
-import { StoreItemDomain, StoreItemCurrency } from '@common/store';
+import {
+  StoreItemDomain,
+  StoreItemCurrency,
+  StoreItemWithFlatPriceDomain,
+} from '@common/store';
 
 @Injectable()
 export class StoreService implements OnModuleInit {
@@ -58,6 +62,22 @@ export class StoreService implements OnModuleInit {
     const items = await this.getStoreItemsCatalog();
     await this.storeItemCache.saveAllItems(items);
     return items;
+  }
+
+  public transformStoreItemsInStoreItemsWithFlatPrice(
+    items: StoreItemDomain[],
+    region: keyof typeof Region,
+  ): StoreItemWithFlatPriceDomain[] {
+    return items.map((item) => {
+      return {
+        ...item,
+        flatPrice: this.getFlatItemPriceByRegion(
+          item.price,
+          item.currency,
+          region,
+        ),
+      };
+    });
   }
 
   public async findAllStoreItemsByOfferId(
