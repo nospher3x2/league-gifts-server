@@ -12,7 +12,7 @@ export class PrismaUsersMapper {
       name: user.name,
       email: user.email,
       password: user.password,
-      balance: user.balance,
+      balance: user.balance.toNumber(),
       role: user.role,
       status: user.status,
       createdAt: user.createdAt,
