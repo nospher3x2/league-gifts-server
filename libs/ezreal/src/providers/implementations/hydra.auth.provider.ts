@@ -55,12 +55,10 @@ export class HydraAuthProvider implements AuthProvider {
         }
 
         const errorMessage = data.error;
-        if (errorMessage === 'Syntax error') {
-          throw new AuthSyntaxErrorException(data.INFO);
-        }
-
-        if (data.INFO) {
-          throw new AuthUnknownErrorException(data.INFO);
+        if (
+          ['Key does not exist', 'Invalid client_id'].includes(errorMessage)
+        ) {
+          throw new AuthSyntaxErrorException(data.error);
         }
 
         switch (errorMessage) {

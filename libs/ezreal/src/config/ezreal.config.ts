@@ -8,6 +8,9 @@ export class EzrealConfig {
   public readonly RIOT_GAMES_ACCOUNT_API_URL =
     'https://api.account.riotgames.com';
 
+  public readonly RIOT_GEO_PAS_API_URL =
+    'https://riot-geo.pas.si.riotgames.com';
+
   public readonly LEAGUE_EDGE_API_URL: Record<keyof typeof Region, string> = {
     BR1: 'https://br-red.lol.sgp.pvp.net',
     EUN1: 'https://eune-red.lol.sgp.pvp.net',
@@ -43,5 +46,103 @@ export class EzrealConfig {
     SG2: 'https://apse1-green.pp.sgp.pvp.net',
     PH2: 'https://ph2-red.lol.sgp.pvp.net',
     VN2: 'https://apse1-green.pp.sgp.pvp.net',
+  };
+
+  public readonly RIOT_CHAT_SERVER_URL: Record<
+    string,
+    { host: string; prefix: string }
+  > = {
+    as2: {
+      host: 'as2.chat.si.riotgames.com',
+      prefix: 'as2',
+    },
+    asia: {
+      host: 'jp1.chat.si.riotgames.com',
+      prefix: 'jp',
+    },
+    br1: {
+      host: 'br.chat.si.riotgames.com',
+      prefix: 'br1',
+    },
+    eu: {
+      host: 'ru1.chat.si.riotgames.com',
+      prefix: 'ru1',
+    },
+    eu3: {
+      host: 'eu3.chat.si.riotgames.com',
+      prefix: 'eu3',
+    },
+    eun1: {
+      host: 'eun1.chat.si.riotgames.com',
+      prefix: 'eu2',
+    },
+    euw1: {
+      host: 'euw1.chat.si.riotgames.com',
+      prefix: 'eu1',
+    },
+    jp1: {
+      host: 'jp1.chat.si.riotgames.com',
+      prefix: 'jp1',
+    },
+    la1: {
+      host: 'la1.chat.si.riotgames.com',
+      prefix: 'la1',
+    },
+    la2: {
+      host: 'la2.chat.si.riotgames.com',
+      prefix: 'la2',
+    },
+    na1: {
+      host: 'na2.chat.si.riotgames.com',
+      prefix: 'na1',
+    },
+    oc1: {
+      host: 'oc1.chat.si.riotgames.com',
+      prefix: 'oc1',
+    },
+    ru1: {
+      host: 'ru1.chat.si.riotgames.com',
+      prefix: 'ru1',
+    },
+    sea1: {
+      host: 'sa1.chat.si.riotgames.com',
+      prefix: 'sa1',
+    },
+    sea2: {
+      host: 'sa2.chat.si.riotgames.com',
+      prefix: 'sa2',
+    },
+    sea3: {
+      host: 'sa3.chat.si.riotgames.com',
+      prefix: 'sa3',
+    },
+    sea4: {
+      host: 'sa4.chat.si.riotgames.com',
+      prefix: 'sa4',
+    },
+    sea5: {
+      host: 'sa5.chat.si.riotgames.com',
+      prefix: 'sa5',
+    },
+    tr1: {
+      host: 'tr1.chat.si.riotgames.com',
+      prefix: 'tr1',
+    },
+    us: {
+      host: 'la1.chat.si.riotgames.com',
+      prefix: 'la1',
+    },
+    'us-br1': {
+      host: 'br.chat.si.riotgames.com',
+      prefix: 'br1',
+    },
+    'us-la2': {
+      host: 'la2.chat.si.riotgames.com',
+      prefix: 'la2',
+    },
+    us2: {
+      host: 'us2.chat.si.riotgames.com',
+      prefix: 'us2',
+    },
   };
 }

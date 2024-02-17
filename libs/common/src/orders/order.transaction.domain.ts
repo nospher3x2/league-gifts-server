@@ -34,6 +34,7 @@ export class OrderTransactionWithItemDomain extends OrderTransactionDomain {
 
 export class OrderTransactionWithItemAndSenderDomain extends OrderTransactionDomain {
   public item: StoreItemDomain;
+  @Exclude()
   public sender: LeagueAccountDomain;
 
   constructor(partial: Partial<OrderTransactionWithItemAndSenderDomain>) {

@@ -1,14 +1,21 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { CreateOrderDto } from '../dtos/create.order.dto';
-import {
-  OrderDomain,
-  OrderWithRecipientAndTransactionsDomain,
-} from '../entities/order.domain';
+
 import { OrdersService } from '../services/orders.service';
 import { plainToInstance } from 'class-transformer';
 import { JwtAuthGuard } from '../../auth/guards/jwt.guard';
 import { User } from '../../users/decorators/user.decorator';
-import { UserDomain } from '../../users/domain/user.domain';
+import {
+  OrderDomain,
+  OrderStatus,
+  OrderTransactionDomain,
+  OrderTransactionStatus,
+  OrderWithRecipientAndTransactionsDomain,
+} from '@common/orders';
+import { UserDomain } from '@common/users';
+import { MessagePattern } from '@nestjs/microservices';
+import { RecipientExistsPipe } from '../../recipients/pipes/recipient.exists.pipe';
+import { RecipientDomain } from '@common/recipients';
 
 @Controller('orders')
 @UseGuards(JwtAuthGuard)
@@ -22,12 +29,34 @@ export class OrdersController {
     return this.ordersService.findAllByUserId(user.id);
   }
 
-  @Post()
+  @Post(':recipientId')
   public async createOne(
     @User() user: UserDomain,
+    @Param('recipientId', RecipientExistsPipe('VERIFIED'))
+    recipient: RecipientDomain,
     @Body() createOrderDto: CreateOrderDto,
   ): Promise<OrderDomain> {
-    const order = await this.ordersService.createOneOrder(user, createOrderDto);
+    const order = await this.ordersService.createOne(
+      user,
+      recipient,
+      createOrderDto.offerIds,
+    );
     return plainToInstance(OrderWithRecipientAndTransactionsDomain, order);
+  }
+
+  @MessagePattern('order.status.update')
+  public async updateOrderStatus(
+    orderId: string,
+    status: keyof typeof OrderStatus,
+  ): Promise<OrderDomain | null> {
+    return this.ordersService.updateOrderStatus(orderId, status);
+  }
+
+  @MessagePattern('transaction.status.update')
+  public async updateTransactionStatus(
+    transactionId: string,
+    status: keyof typeof OrderTransactionStatus,
+  ): Promise<OrderTransactionDomain | null> {
+    return this.ordersService.updateTransactionStatus(transactionId, status);
   }
 }

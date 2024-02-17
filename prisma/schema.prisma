@@ -112,6 +112,7 @@ enum LeagueAccountType {
 
 model LeagueAccount {
   id                        String             @id @default(uuid())
+  type                      LeagueAccountType
   region                    String
   username                  String             @unique
   password                  String
@@ -123,7 +124,6 @@ model LeagueAccount {
   userInfoToken             String?            @map("user_info_token") @db.Text()
   sessionQueueToken         String?            @map("session_queue_token") @db.Text()
   sessionQueueTokenExpireAt DateTime?          @map("session_queue_token_expire_at")
-  type                      LeagueAccountType
   orders                    OrderTransaction[]
   createdAt                 DateTime           @default(now()) @map("created_at")
   updatedAt                 DateTime           @updatedAt @map("updated_at")
@@ -154,6 +154,7 @@ model Order {
 
 enum OrderTransactionStatus {
   PENDING
+  WAITING_FRIEND_REQUEST
   ACCEPTED
   FULFILLMENT_SUCCESSFUL
   FAILED

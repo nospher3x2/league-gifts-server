@@ -7,6 +7,7 @@ import { UserDomain } from '@common/users';
 import { PasswordService } from '@common/password';
 import { CreateUserDto } from '../dtos/create.user.dto';
 import { UsersRepository } from '../repositories/users.repository';
+import { FlatTransactionClient } from '@common';
 
 @Injectable()
 export class UsersService {
@@ -54,12 +55,15 @@ export class UsersService {
     return user;
   }
 
-  public async decrementOneBalanceByIdAndCurrentBalance(
+  public async createTransactionToDecrementBalanceByIdAndCurrentBalance(
     id: string,
     balance: number,
-    currentBalance: number, // Optimistic concurrency control
-  ): Promise<UserDomain> {
-    return this.usersRepository.decrementOneBalanceByIdAndCurrentBalance(
+    currentBalance: number,
+  ): Promise<{
+    transaction: FlatTransactionClient;
+    user: UserDomain;
+  }> {
+    return this.usersRepository.createTransactionToDecrementBalanceByIdAndCurrentBalance(
       id,
       balance,
       currentBalance,

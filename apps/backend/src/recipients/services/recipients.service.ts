@@ -99,12 +99,10 @@ export class RecipientsService {
         return this.recipientsRepository.saveOne(alreadyCreatedRecipient);
       }
 
-      const status = alreadyCreatedRecipient.isVerified()
-        ? 'verified'
-        : 'pending';
-
       throw new ConflictException(
-        `Recipient ${createRecipientDto.name} is already ${status}.`,
+        `Recipient ${
+          createRecipientDto.name
+        } is already ${alreadyCreatedRecipient.status.toLowerCase()}.`,
       );
     }
 

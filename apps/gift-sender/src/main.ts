@@ -11,6 +11,9 @@ async function bootstrap() {
         client: {
           brokers: ['localhost:9092'],
         },
+        consumer: {
+          groupId: 'gift-sender-consumer',
+        },
       },
     },
   );

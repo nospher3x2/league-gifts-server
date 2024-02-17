@@ -1,4 +1,5 @@
 import axios from 'axios';
+import tls from 'tls';
 import { AccountSession } from './interfaces/account.session.interface';
 import { Summoner } from './interfaces/summoner.interface';
 import { AuthProvider } from './providers/auth.provider';
@@ -6,10 +7,14 @@ import { HydraAuthProvider } from './providers/implementations/hydra.auth.provid
 import { EzrealConfig } from './config/ezreal.config';
 import { CapOrder } from './interfaces/cap.order.interface';
 import { Nameset } from './interfaces/nameset.interface';
+import { ChatSession } from './interfaces/chat.session.interface';
+import { Wallet } from './interfaces/wallet.interface';
+import { Stream } from 'stream';
 
 class Ezreal {
-  private static config: EzrealConfig = new EzrealConfig();
-  private static authProvider: AuthProvider = new HydraAuthProvider(
+  private static readonly chatSession: Map<string, ChatSession> = new Map();
+  private static readonly config: EzrealConfig = new EzrealConfig();
+  private static readonly authProvider: AuthProvider = new HydraAuthProvider(
     Ezreal.config,
   );
 
@@ -37,6 +42,70 @@ class Ezreal {
     session.sessionQueueTokenExpireAt = sessionQueueToken.expireAt;
 
     return session;
+  }
+
+  public static async authenticateOnChat(
+    session: AccountSession,
+  ): Promise<ChatSession> {
+    if (Ezreal.chatSession.has(session.id)) {
+      return Ezreal.chatSession.get(session.id);
+    }
+
+    const chatSessionToken = await Ezreal.getGeoPasServiceChatToken(session);
+    const chatAffinity = JSON.parse(
+      Buffer.from(chatSessionToken.split('.')[1], 'base64').toString(),
+    )['affinity'];
+
+    const chatServer = Ezreal.config.RIOT_CHAT_SERVER_URL[chatAffinity];
+    return new Promise((resolve, reject) => {
+      const server = tls.connect(
+        {
+          host: chatServer.host,
+          port: 5223,
+        },
+        () => {
+          server.write(
+            `<stream:stream xmlns="jabber:client" xmlns:stream="http://etherx.jabber.org/streams" version="1.0" to="${chatServer.prefix}.pvp.net">`,
+          );
+
+          const stream = new Stream.PassThrough();
+          stream.on('data', (chunk: Buffer) => {
+            const payload = chunk.toString();
+            if (payload.includes('account-disabled')) {
+              return reject(new Error('This account is disabled'));
+            }
+
+            if (payload.includes('X-Riot-RSO-PAS')) {
+              server.write(
+                `<auth mechanism="X-Riot-RSO-PAS" xmlns="urn:ietf:params:xml:ns:xmpp-sasl"><rso_token>${session.partnerToken}</rso_token><pas_token>${chatSessionToken}</pas_token></auth>`,
+              );
+              return;
+            }
+
+            if (payload.includes('success')) {
+              server.write(
+                `<stream:stream xmlns="jabber:client" xmlns:stream="http://etherx.jabber.org/streams" version="1.0" to="${chatServer.prefix}.pvp.net">`,
+              );
+              server.write(
+                `<iq xmlns="jabber:client" type="set" id="1"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"><resource>xiff</resource></bind></iq>`,
+              );
+              server.write(
+                `<iq xmlns='jabber:client' type='set' id='2'><session xmlns='urn:ietf:params:xml:ns:xmpp-session' /></iq><presence/>`,
+              );
+              return;
+            }
+
+            if (payload.includes(`to='${session.id}`)) {
+              return resolve({
+                server,
+                stream,
+              });
+            }
+          });
+          server.pipe(stream);
+        },
+      );
+    });
   }
 
   public static async getUserInfoToken(
@@ -111,11 +180,24 @@ class Ezreal {
     };
   }
 
-  public static async getStoreWallet(
+  public static async getGeoPasServiceChatToken(
     session: AccountSession,
-  ): Promise<{ ip: number; rp: number }> {
+  ): Promise<string> {
+    return axios
+      .get<string>(
+        `${Ezreal.config.RIOT_GEO_PAS_API_URL}/pas/v1/service/chat`,
+        {
+          headers: {
+            Authorization: `Bearer ${session.partnerToken}`,
+          },
+        },
+      )
+      .then((response) => response.data);
+  }
+
+  public static async getStoreWallet(session: AccountSession): Promise<Wallet> {
     return await Ezreal.ledge(session)
-      .get<{ ip: number; rp: number }>('/storefront/v2/wallet')
+      .get<Wallet>('/storefront/v2/wallet')
       .then((response) => response.data);
   }
 
@@ -244,6 +326,17 @@ class Ezreal {
         },
       })
       .then((response) => response.data);
+  }
+
+  public static async sendChatFriendRequest(
+    session: ChatSession,
+    friendRequestId: number,
+    nameset: Nameset,
+  ): Promise<string> {
+    session;
+    friendRequestId;
+    nameset;
+    return;
   }
 
   private static ledge(session: AccountSession) {

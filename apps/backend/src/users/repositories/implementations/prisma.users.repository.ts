@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { PrismaService } from '@common';
+import { FlatTransactionClient, PrismaService } from '@common';
 import { Prisma, UserRole, UserStatus } from '@prisma/client';
 import { UsersRepository } from '../users.repository';
 import { PrismaUsersMapper } from '../mappers/prisma.users.mapper';
@@ -53,24 +53,31 @@ export class PrismaUsersRepository implements UsersRepository {
     return PrismaUsersMapper.toDomain(user);
   }
 
-  public async decrementOneBalanceByIdAndCurrentBalance(
+  public async createTransactionToDecrementBalanceByIdAndCurrentBalance(
     id: string,
     balance: number,
     currentBalance: number,
-  ): Promise<UserDomain> {
-    return await this.prisma.$transaction(
-      async (transaction) => {
-        const lockResult: UserDomain[] = await transaction.$queryRaw`
-          SELECT * FROM User WHERE id = ${id} AND balance = ${currentBalance} LIMIT 1 FOR UPDATE;
-        `;
+  ): Promise<{
+    transaction: FlatTransactionClient;
+    user: UserDomain;
+  }> {
+    const transaction = await this.prisma.transactionClient.$begin(
+      Prisma.TransactionIsolationLevel.Serializable,
+    );
 
-        if (lockResult.length === 0) {
-          throw new BadRequestException(
-            'Invalid current balance, please try again',
-          );
-        }
+    try {
+      const lockResult: UserDomain[] = await transaction.$queryRaw`
+            SELECT * FROM User WHERE id = ${id} AND balance = ${currentBalance} LIMIT 1 FOR UPDATE;
+          `;
 
-        const user = await transaction.user.update({
+      if (lockResult.length === 0) {
+        throw new BadRequestException(
+          'Failed to find your current balance to decrement, please try again. If the problem persists, contact support.',
+        );
+      }
+
+      const user = await transaction.user
+        .update({
           data: {
             balance: {
               decrement: balance,
@@ -80,25 +87,36 @@ export class PrismaUsersRepository implements UsersRepository {
             id,
             balance: currentBalance,
           },
+        })
+        .catch((error: Prisma.PrismaClientKnownRequestError) => {
+          if (error.code === 'P2025') {
+            throw new BadRequestException(
+              'Failed to decrement balance, please try again. If the problem persists, contact support.',
+            );
+          }
+
+          throw error;
         });
 
-        if (!user) {
-          throw new BadRequestException(
-            'Failed to decrement balance, please try again',
-          );
-        }
+      if (!user) {
+        throw new BadRequestException(
+          'Failed to decrement balance, please try again. If the problem persists, contact support.',
+        );
+      }
 
-        if (user.balance < 0) {
-          throw new BadRequestException(
-            `${user.name} does not have enough balance`,
-          );
-        }
+      if (user.balance.lessThan(0)) {
+        throw new BadRequestException(
+          `You dont have enough balance. Your current balance is ${user.balance.toString()}.`,
+        );
+      }
 
-        return PrismaUsersMapper.toDomain(user);
-      },
-      {
-        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
-      },
-    );
+      return {
+        transaction,
+        user: PrismaUsersMapper.toDomain(user),
+      };
+    } catch (error) {
+      await transaction.$rollback();
+      throw error;
+    }
   }
 }
