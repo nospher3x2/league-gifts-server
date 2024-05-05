@@ -1,5 +1,9 @@
 version: '3.9'
 
+networks:
+  backend:
+    driver: bridge
+
 services:
   api:
     build:
@@ -18,8 +22,9 @@ services:
     ports:
       - ${PORT}:${PORT}
     depends_on:
+      - postgres
       - redis
-      - mysql
+      - rabbitmq
 
   postgres:
     image: arm64v8/postgres:16.2-alpine3.19
@@ -56,10 +61,6 @@ services:
     networks:
       - backend
       
-networks:
-  backend:
-    driver: bridge
-
 volumes:
   mysql:
   redis:
