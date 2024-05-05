@@ -10,6 +10,7 @@ import { Nameset } from './interfaces/nameset.interface';
 import { ChatSession } from './interfaces/chat.session.interface';
 import { Wallet } from './interfaces/wallet.interface';
 import { Stream } from 'stream';
+import { AccountDisabledException } from './exceptions/account.disabled.exception';
 
 class Ezreal {
   private static readonly chatSession: Map<string, ChatSession> = new Map();
@@ -52,59 +53,55 @@ class Ezreal {
     }
 
     const chatSessionToken = await Ezreal.getGeoPasServiceChatToken(session);
-    const chatAffinity = JSON.parse(
-      Buffer.from(chatSessionToken.split('.')[1], 'base64').toString(),
-    )['affinity'];
-
+    const chatAffinity = Ezreal.getChatAffinityFromToken(chatSessionToken);
     const chatServer = Ezreal.config.RIOT_CHAT_SERVER_URL[chatAffinity];
-    return new Promise((resolve, reject) => {
+
+    return new Promise((resolve) => {
       const server = tls.connect(
         {
-          host: chatServer.host,
+          host: Ezreal.config.RIOT_CHAT_SERVER_URL[chatAffinity].host,
           port: 5223,
         },
         () => {
           server.write(
             `<stream:stream xmlns="jabber:client" xmlns:stream="http://etherx.jabber.org/streams" version="1.0" to="${chatServer.prefix}.pvp.net">`,
           );
-
-          const stream = new Stream.PassThrough();
-          stream.on('data', (chunk: Buffer) => {
-            const payload = chunk.toString();
-            if (payload.includes('account-disabled')) {
-              return reject(new Error('This account is disabled'));
-            }
-
-            if (payload.includes('X-Riot-RSO-PAS')) {
-              server.write(
-                `<auth mechanism="X-Riot-RSO-PAS" xmlns="urn:ietf:params:xml:ns:xmpp-sasl"><rso_token>${session.partnerToken}</rso_token><pas_token>${chatSessionToken}</pas_token></auth>`,
-              );
-              return;
-            }
-
-            if (payload.includes('success')) {
-              server.write(
-                `<stream:stream xmlns="jabber:client" xmlns:stream="http://etherx.jabber.org/streams" version="1.0" to="${chatServer.prefix}.pvp.net">`,
-              );
-              server.write(
-                `<iq xmlns="jabber:client" type="set" id="1"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"><resource>xiff</resource></bind></iq>`,
-              );
-              server.write(
-                `<iq xmlns='jabber:client' type='set' id='2'><session xmlns='urn:ietf:params:xml:ns:xmpp-session' /></iq><presence/>`,
-              );
-              return;
-            }
-
-            if (payload.includes(`to='${session.id}`)) {
-              return resolve({
-                server,
-                stream,
-              });
-            }
-          });
-          server.pipe(stream);
         },
       );
+
+      const stream = new Stream.PassThrough();
+      stream.on('data', (chunk: Buffer) => {
+        const payload = chunk.toString();
+        if (payload.includes('account-disabled')) {
+          throw new AccountDisabledException();
+        }
+
+        if (payload.includes('X-Riot-RSO-PAS')) {
+          server.write(
+            `<auth mechanism="X-Riot-RSO-PAS" xmlns="urn:ietf:params:xml:ns:xmpp-sasl"><rso_token>${session.partnerToken}</rso_token><pas_token>${chatSessionToken}</pas_token></auth>`,
+          );
+          return;
+        }
+
+        if (payload.includes('success')) {
+          server.write(
+            `<stream:stream xmlns="jabber:client" xmlns:stream="http://etherx.jabber.org/streams" version="1.0" to="${chatServer.prefix}.pvp.net">`,
+          );
+          server.write(
+            `<iq xmlns="jabber:client" type="set" id="1"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"><resource>xiff</resource></bind></iq>`,
+          );
+          server.write(
+            `<iq xmlns='jabber:client' type='set' id='2'><session xmlns='urn:ietf:params:xml:ns:xmpp-session' /></iq><presence/>`,
+          );
+
+          return;
+        }
+
+        if (payload.includes(`to='${session.id}`)) {
+          return resolve(new ChatSession(server, stream));
+        }
+      });
+      server.pipe(stream);
     });
   }
 
@@ -212,8 +209,7 @@ class Ezreal {
           language: language,
         },
       })
-      .then((response) => response.data)
-      .catch((error) => Error(error.response.data));
+      .then((response) => response.data);
   }
 
   public static async getSummonersByPuuids(
@@ -328,15 +324,10 @@ class Ezreal {
       .then((response) => response.data);
   }
 
-  public static async sendChatFriendRequest(
-    session: ChatSession,
-    friendRequestId: number,
-    nameset: Nameset,
-  ): Promise<string> {
-    session;
-    friendRequestId;
-    nameset;
-    return;
+  private static getChatAffinityFromToken(token: string): string {
+    return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())[
+      'affinity'
+    ];
   }
 
   private static ledge(session: AccountSession) {
